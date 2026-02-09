@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { Sparkles, Home, Building, Truck } from "lucide-react";
+import { Sparkles, Home, Building, Truck, FileDown } from "lucide-react";
+import jsPDF from "jspdf";
 
 type CleaningType = "basic" | "deep" | "moveout";
 
@@ -34,6 +35,66 @@ const cleaningOptions: {
 ];
 
 const CleaningCalculator = () => {
+  const generatePDF = (area: number, service: typeof cleaningOptions[number], total: number) => {
+    const doc = new jsPDF();
+    const date = new Date().toLocaleDateString();
+
+    // Header
+    doc.setFontSize(22);
+    doc.setFont("helvetica", "bold");
+    doc.text("Cleaning Service Proposal", 20, 30);
+
+    doc.setFontSize(10);
+    doc.setFont("helvetica", "normal");
+    doc.setTextColor(120);
+    doc.text(`Date: ${date}`, 20, 40);
+
+    // Divider
+    doc.setDrawColor(200);
+    doc.line(20, 46, 190, 46);
+
+    // Service details
+    doc.setTextColor(40);
+    doc.setFontSize(13);
+    doc.setFont("helvetica", "bold");
+    doc.text("Service Details", 20, 58);
+
+    doc.setFontSize(11);
+    doc.setFont("helvetica", "normal");
+    const details = [
+      ["Service Type", service.label],
+      ["Description", service.description],
+      ["Area", `${area} m²`],
+      ["Rate", `€${service.pricePerSqm.toFixed(2)} per m²`],
+    ];
+
+    let y = 68;
+    details.forEach(([label, value]) => {
+      doc.setFont("helvetica", "bold");
+      doc.text(`${label}:`, 20, y);
+      doc.setFont("helvetica", "normal");
+      doc.text(value, 70, y);
+      y += 9;
+    });
+
+    // Total box
+    y += 6;
+    doc.setFillColor(34, 120, 90);
+    doc.roundedRect(20, y, 170, 22, 3, 3, "F");
+    doc.setTextColor(255);
+    doc.setFontSize(14);
+    doc.setFont("helvetica", "bold");
+    doc.text(`Total: €${total.toFixed(2)}`, 105, y + 14, { align: "center" });
+
+    // Footer
+    doc.setTextColor(150);
+    doc.setFontSize(9);
+    doc.setFont("helvetica", "normal");
+    doc.text("This is an estimate. Final pricing may vary based on on-site assessment.", 20, 280);
+
+    doc.save(`cleaning-proposal-${date}.pdf`);
+  };
+
   const [sqm, setSqm] = useState<string>("");
   const [selectedType, setSelectedType] = useState<CleaningType>("basic");
 
@@ -133,6 +194,17 @@ const CleaningCalculator = () => {
               : "Enter an area to see your quote"}
           </div>
         </div>
+
+        {/* Generate PDF */}
+        {area > 0 && (
+          <button
+            onClick={() => generatePDF(area, selected, totalPrice)}
+            className="w-full flex items-center justify-center gap-2 rounded-xl border-2 border-primary bg-card px-4 py-3 font-semibold text-primary hover:bg-accent transition-all"
+          >
+            <FileDown className="w-5 h-5" />
+            Download Proposal PDF
+          </button>
+        )}
       </div>
     </div>
   );
