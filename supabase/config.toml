@@ -1,1 +1,4 @@
 project_id = "qgahkwnhmqmdgercxsbw"
+
+[functions.send-proposal-email]
+verify_jwt = false
