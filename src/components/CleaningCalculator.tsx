@@ -3,6 +3,7 @@ import { Sparkles, Home, Truck, FileDown, Settings } from "lucide-react";
 import { Link } from "react-router-dom";
 import jsPDF from "jspdf";
 import { useTemplateSettings } from "@/context/TemplateSettingsContext";
+import EmailProposalDialog from "@/components/EmailProposalDialog";
 
 type CleaningType = "basic" | "deep" | "moveout";
 
@@ -197,15 +198,29 @@ const CleaningCalculator = () => {
         </div>
 
         {/* Actions */}
-        <div className="flex gap-3">
+        <div className="flex gap-3 flex-wrap">
           {area > 0 && (
-            <button
-              onClick={generatePDF}
-              className="flex-1 flex items-center justify-center gap-2 rounded-xl border-2 border-primary bg-card px-4 py-3 font-semibold text-primary hover:bg-accent transition-all"
-            >
-              <FileDown className="w-5 h-5" />
-              Download Proposal PDF
-            </button>
+            <>
+              <button
+                onClick={generatePDF}
+                className="flex-1 flex items-center justify-center gap-2 rounded-xl border-2 border-primary bg-card px-4 py-3 font-semibold text-primary hover:bg-accent transition-all"
+              >
+                <FileDown className="w-5 h-5" />
+                Download PDF
+              </button>
+              <EmailProposalDialog
+                area={area}
+                serviceLabel={selected.label}
+                serviceDescription={selected.description}
+                pricePerSqm={selected.pricePerSqm}
+                totalPrice={totalPrice}
+                companyName={settings.companyName}
+                companyAddress={settings.companyAddress}
+                companyPhone={settings.companyPhone}
+                companyEmail={settings.companyEmail}
+                billingDate={settings.billingDate}
+              />
+            </>
           )}
           <Link
             to="/settings"
