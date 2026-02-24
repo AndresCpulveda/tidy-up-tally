@@ -12,11 +12,12 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
 interface EmailProposalDialogProps {
-  area: number;
-  serviceLabel: string;
-  serviceDescription: string;
-  pricePerSqm: number;
-  totalPrice: number;
+  totalHoursPerWeek: number;
+  totalBill: number;
+  numPeople: number;
+  hoursPerPerson: number;
+  timesPerWeek: number;
+  hourlyRate: number;
   companyName: string;
   companyAddress: string;
   companyPhone: string;
@@ -25,11 +26,12 @@ interface EmailProposalDialogProps {
 }
 
 export default function EmailProposalDialog({
-  area,
-  serviceLabel,
-  serviceDescription,
-  pricePerSqm,
-  totalPrice,
+  totalHoursPerWeek,
+  totalBill,
+  numPeople,
+  hoursPerPerson,
+  timesPerWeek,
+  hourlyRate,
   companyName,
   companyAddress,
   companyPhone,
@@ -48,13 +50,14 @@ export default function EmailProposalDialog({
       <hr style="border:none;border-top:1px solid #e5e5e5;margin:16px 0;" />
       <h2 style="font-size:18px;color:#1a1a1a;">Cleaning Service Proposal</h2>
       <table style="width:100%;border-collapse:collapse;margin:16px 0;">
-        <tr><td style="padding:8px 0;color:#666;">Service</td><td style="padding:8px 0;font-weight:600;">${serviceLabel}</td></tr>
-        <tr><td style="padding:8px 0;color:#666;">Description</td><td style="padding:8px 0;">${serviceDescription}</td></tr>
-        <tr><td style="padding:8px 0;color:#666;">Area</td><td style="padding:8px 0;">${area} m²</td></tr>
-        <tr><td style="padding:8px 0;color:#666;">Rate</td><td style="padding:8px 0;">€${pricePerSqm.toFixed(2)} per m²</td></tr>
+        <tr><td style="padding:8px 0;color:#666;">Number of People</td><td style="padding:8px 0;font-weight:600;">${numPeople}</td></tr>
+        <tr><td style="padding:8px 0;color:#666;">Hours per Person</td><td style="padding:8px 0;">${hoursPerPerson}</td></tr>
+        <tr><td style="padding:8px 0;color:#666;">Times per Week</td><td style="padding:8px 0;">${timesPerWeek}</td></tr>
+        <tr><td style="padding:8px 0;color:#666;">Hourly Rate</td><td style="padding:8px 0;">€${hourlyRate.toFixed(2)}</td></tr>
+        <tr><td style="padding:8px 0;color:#666;">Total Hours/Week</td><td style="padding:8px 0;font-weight:600;">${totalHoursPerWeek.toFixed(1)}</td></tr>
       </table>
       <div style="background:#22785a;color:#fff;padding:16px;border-radius:8px;text-align:center;font-size:20px;font-weight:700;">
-        Total: €${totalPrice.toFixed(2)}
+        To Bill: €${totalBill.toFixed(2)}
       </div>
       ${billingDate ? `<p style="margin-top:12px;color:#666;font-size:13px;">Terms: ${billingDate}</p>` : ""}
       <p style="margin-top:24px;color:#999;font-size:12px;">This is an estimate. Final pricing may vary based on on-site assessment.</p>
@@ -68,7 +71,7 @@ export default function EmailProposalDialog({
       const { data, error } = await supabase.functions.invoke("send-proposal-email", {
         body: {
           recipientEmail: email,
-          subject: `Cleaning Proposal — ${serviceLabel} (${area} m²)`,
+          subject: `Cleaning Proposal — ${totalHoursPerWeek.toFixed(1)} hrs/week`,
           proposalHtml: buildHtml(),
         },
       });

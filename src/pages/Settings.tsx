@@ -3,7 +3,7 @@ import { ArrowLeft, Building2, CreditCard, CalendarDays } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const Settings = () => {
-  const { settings, updateSettings, updatePricing } = useTemplateSettings();
+  const { settings, updateSettings, updateHourlyRate } = useTemplateSettings();
 
   return (
     <div className="min-h-screen flex flex-col items-center px-4 py-12">
@@ -46,13 +46,9 @@ const Settings = () => {
         <section className="space-y-4">
           <div className="flex items-center gap-2 text-foreground font-semibold">
             <CreditCard className="w-5 h-5 text-primary" />
-            Pricing (€ per m²)
+            Pricing
           </div>
-          <div className="grid grid-cols-3 gap-3">
-            <PriceField label="Basic" value={settings.pricing.basic} onChange={(v) => updatePricing({ basic: v })} />
-            <PriceField label="Deep" value={settings.pricing.deep} onChange={(v) => updatePricing({ deep: v })} />
-            <PriceField label="Move-in/out" value={settings.pricing.moveout} onChange={(v) => updatePricing({ moveout: v })} />
-          </div>
+          <PriceField label="Hourly Rate (€)" value={settings.hourlyRate} onChange={updateHourlyRate} />
         </section>
 
         {/* Billing */}
