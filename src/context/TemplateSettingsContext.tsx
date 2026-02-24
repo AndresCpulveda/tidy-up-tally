@@ -7,11 +7,7 @@ export interface TemplateSettings {
   companyEmail: string;
   logoUrl: string;
   billingDate: string;
-  pricing: {
-    basic: number;
-    deep: number;
-    moveout: number;
-  };
+  hourlyRate: number;
 }
 
 const defaultSettings: TemplateSettings = {
@@ -21,17 +17,13 @@ const defaultSettings: TemplateSettings = {
   companyEmail: "info@cleanpro.com",
   logoUrl: "",
   billingDate: "Due upon receipt",
-  pricing: {
-    basic: 3.5,
-    deep: 6.0,
-    moveout: 8.5,
-  },
+  hourlyRate: 25,
 };
 
 interface TemplateSettingsContextType {
   settings: TemplateSettings;
   updateSettings: (s: Partial<TemplateSettings>) => void;
-  updatePricing: (p: Partial<TemplateSettings["pricing"]>) => void;
+  updateHourlyRate: (rate: number) => void;
 }
 
 const TemplateSettingsContext = createContext<TemplateSettingsContextType | null>(null);
@@ -58,12 +50,12 @@ export function TemplateSettingsProvider({ children }: { children: ReactNode }) 
     persist({ ...settings, ...partial });
   };
 
-  const updatePricing = (partial: Partial<TemplateSettings["pricing"]>) => {
-    persist({ ...settings, pricing: { ...settings.pricing, ...partial } });
+  const updateHourlyRate = (rate: number) => {
+    persist({ ...settings, hourlyRate: rate });
   };
 
   return (
-    <TemplateSettingsContext.Provider value={{ settings, updateSettings, updatePricing }}>
+    <TemplateSettingsContext.Provider value={{ settings, updateSettings, updateHourlyRate }}>
       {children}
     </TemplateSettingsContext.Provider>
   );

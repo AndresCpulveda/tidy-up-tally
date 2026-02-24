@@ -1,57 +1,28 @@
 import { useState } from "react";
-import { Sparkles, Home, Truck, FileDown, Settings } from "lucide-react";
+import { Sparkles, FileDown, Settings, Users, Clock, CalendarDays } from "lucide-react";
 import { Link } from "react-router-dom";
 import jsPDF from "jspdf";
 import { useTemplateSettings } from "@/context/TemplateSettingsContext";
 import EmailProposalDialog from "@/components/EmailProposalDialog";
 
-type CleaningType = "basic" | "deep" | "moveout";
-
-const cleaningOptionsMeta: {
-  id: CleaningType;
-  label: string;
-  description: string;
-  icon: React.ReactNode;
-}[] = [
-  {
-    id: "basic",
-    label: "Basic Cleaning",
-    description: "Regular maintenance clean — dusting, vacuuming, mopping",
-    icon: <Home className="w-5 h-5" />,
-  },
-  {
-    id: "deep",
-    label: "Deep Cleaning",
-    description: "Thorough scrub — appliances, grout, baseboards included",
-    icon: <Sparkles className="w-5 h-5" />,
-  },
-  {
-    id: "moveout",
-    label: "Move-in / Move-out",
-    description: "Full restoration clean — every corner, cabinet & fixture",
-    icon: <Truck className="w-5 h-5" />,
-  },
-];
-
 const CleaningCalculator = () => {
   const { settings } = useTemplateSettings();
-  const [sqm, setSqm] = useState<string>("");
-  const [selectedType, setSelectedType] = useState<CleaningType>("basic");
+  const [numPeople, setNumPeople] = useState<string>("");
+  const [hoursPerPerson, setHoursPerPerson] = useState<string>("");
+  const [timesPerWeek, setTimesPerWeek] = useState<string>("");
 
-  const cleaningOptions = cleaningOptionsMeta.map((o) => ({
-    ...o,
-    pricePerSqm: settings.pricing[o.id],
-  }));
+  const people = parseFloat(numPeople) || 0;
+  const hours = parseFloat(hoursPerPerson) || 0;
+  const times = parseFloat(timesPerWeek) || 0;
 
-  const area = parseFloat(sqm) || 0;
-  const selected = cleaningOptions.find((o) => o.id === selectedType)!;
-  const totalPrice = area * selected.pricePerSqm;
+  const totalHoursPerWeek = people * hours * times;
+  const totalBill = totalHoursPerWeek * settings.hourlyRate;
+  const hasInput = people > 0 && hours > 0 && times > 0;
 
   const generatePDF = () => {
     const doc = new jsPDF();
     const date = new Date().toLocaleDateString();
 
-    // Company header
     doc.setFontSize(22);
     doc.setFont("helvetica", "bold");
     doc.text(settings.companyName || "Cleaning Service Proposal", 20, 25);
@@ -66,24 +37,22 @@ const CleaningCalculator = () => {
     doc.text(`Date: ${date}`, 190, 25, { align: "right" });
     if (settings.billingDate) doc.text(`Terms: ${settings.billingDate}`, 190, 31, { align: "right" });
 
-    // Divider
     doc.setDrawColor(200);
     doc.line(20, 45, 190, 45);
 
-    // Title
     doc.setTextColor(40);
     doc.setFontSize(16);
     doc.setFont("helvetica", "bold");
     doc.text("Cleaning Service Proposal", 20, 58);
 
-    // Service details
     doc.setFontSize(11);
     doc.setFont("helvetica", "normal");
     const details = [
-      ["Service Type", selected.label],
-      ["Description", selected.description],
-      ["Area", `${area} m²`],
-      ["Rate", `€${selected.pricePerSqm.toFixed(2)} per m²`],
+      ["Number of People", `${people}`],
+      ["Hours per Person", `${hours}`],
+      ["Times per Week", `${times}`],
+      ["Hourly Rate", `€${settings.hourlyRate.toFixed(2)}`],
+      ["Total Hours/Week", `${totalHoursPerWeek.toFixed(1)}`],
     ];
 
     let y = 70;
@@ -91,20 +60,18 @@ const CleaningCalculator = () => {
       doc.setFont("helvetica", "bold");
       doc.text(`${label}:`, 20, y);
       doc.setFont("helvetica", "normal");
-      doc.text(value, 70, y);
+      doc.text(value, 80, y);
       y += 9;
     });
 
-    // Total box
     y += 8;
     doc.setFillColor(34, 120, 90);
     doc.roundedRect(20, y, 170, 22, 3, 3, "F");
     doc.setTextColor(255);
     doc.setFontSize(14);
     doc.setFont("helvetica", "bold");
-    doc.text(`Total: €${totalPrice.toFixed(2)}`, 105, y + 14, { align: "center" });
+    doc.text(`To Bill: €${totalBill.toFixed(2)}`, 105, y + 14, { align: "center" });
 
-    // Footer
     doc.setTextColor(150);
     doc.setFontSize(9);
     doc.setFont("helvetica", "normal");
@@ -125,81 +92,58 @@ const CleaningCalculator = () => {
           Cleaning Price Calculator
         </h1>
         <p className="mt-3 text-muted-foreground">
-          Enter your space size and choose a service to get an instant estimate.
+          Enter your staffing details to get an instant estimate.
         </p>
       </div>
 
       <div className="w-full max-w-lg space-y-6">
-        {/* Square meter input */}
-        <div>
-          <label htmlFor="sqm" className="block text-sm font-medium text-foreground mb-2">
-            Area (m²)
-          </label>
-          <input
-            id="sqm"
-            type="number"
-            min="0"
-            placeholder="e.g. 75"
-            value={sqm}
-            onChange={(e) => setSqm(e.target.value)}
-            className="w-full rounded-xl border border-input bg-card px-4 py-3 text-lg font-semibold text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring transition"
+        {/* Inputs */}
+        <div className="grid gap-4">
+          <InputField
+            id="numPeople"
+            label="Number of People"
+            icon={<Users className="w-4 h-4" />}
+            placeholder="e.g. 3"
+            value={numPeople}
+            onChange={setNumPeople}
+          />
+          <InputField
+            id="hoursPerPerson"
+            label="Hours per Person"
+            icon={<Clock className="w-4 h-4" />}
+            placeholder="e.g. 4"
+            value={hoursPerPerson}
+            onChange={setHoursPerPerson}
+          />
+          <InputField
+            id="timesPerWeek"
+            label="Times per Week"
+            icon={<CalendarDays className="w-4 h-4" />}
+            placeholder="e.g. 2"
+            value={timesPerWeek}
+            onChange={setTimesPerWeek}
           />
         </div>
 
-        {/* Cleaning type selection */}
-        <div>
-          <label className="block text-sm font-medium text-foreground mb-2">
-            Type of Cleaning
-          </label>
-          <div className="grid gap-3">
-            {cleaningOptions.map((option) => {
-              const isActive = selectedType === option.id;
-              return (
-                <button
-                  key={option.id}
-                  onClick={() => setSelectedType(option.id)}
-                  className={`flex items-start gap-4 rounded-xl border-2 px-4 py-4 text-left transition-all ${
-                    isActive
-                      ? "border-primary bg-accent shadow-sm"
-                      : "border-border bg-card hover:border-primary/40"
-                  }`}
-                >
-                  <div
-                    className={`mt-0.5 rounded-lg p-2 ${
-                      isActive
-                        ? "bg-primary text-primary-foreground"
-                        : "bg-secondary text-secondary-foreground"
-                    }`}
-                  >
-                    {option.icon}
-                  </div>
-                  <div className="flex-1">
-                    <div className="font-semibold text-foreground">{option.label}</div>
-                    <div className="text-sm text-muted-foreground mt-0.5">{option.description}</div>
-                  </div>
-                  <div className="text-sm font-semibold text-foreground whitespace-nowrap mt-1">
-                    €{option.pricePerSqm.toFixed(2)}/m²
-                  </div>
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
         {/* Result */}
-        <div className="rounded-xl bg-primary text-primary-foreground p-6 text-center space-y-1">
-          <div className="text-sm font-medium opacity-85">Estimated Total</div>
-          <div className="text-4xl font-bold tracking-tight">€{totalPrice.toFixed(2)}</div>
-          <div className="text-sm opacity-75">
-            {area > 0
-              ? `${area} m² × €${selected.pricePerSqm.toFixed(2)} — ${selected.label}`
-              : "Enter an area to see your quote"}
+        <div className="rounded-xl bg-primary text-primary-foreground p-6 space-y-4">
+          <div className="flex justify-between items-center">
+            <div className="text-sm font-medium opacity-85">Total Hours / Week</div>
+            <div className="text-2xl font-bold tracking-tight">{totalHoursPerWeek.toFixed(1)} hrs</div>
           </div>
+          <div className="border-t border-primary-foreground/20" />
+          <div className="flex justify-between items-center">
+            <div className="text-sm font-medium opacity-85">To Bill</div>
+            <div className="text-3xl font-bold tracking-tight">€{totalBill.toFixed(2)}</div>
+          </div>
+          {!hasInput && (
+            <div className="text-sm opacity-75 text-center">Enter details above to see your quote</div>
+          )}
         </div>
 
         {/* Actions */}
         <div className="flex gap-3 flex-wrap">
-          {area > 0 && (
+          {hasInput && (
             <>
               <button
                 onClick={generatePDF}
@@ -209,11 +153,12 @@ const CleaningCalculator = () => {
                 Download PDF
               </button>
               <EmailProposalDialog
-                area={area}
-                serviceLabel={selected.label}
-                serviceDescription={selected.description}
-                pricePerSqm={selected.pricePerSqm}
-                totalPrice={totalPrice}
+                totalHoursPerWeek={totalHoursPerWeek}
+                totalBill={totalBill}
+                numPeople={people}
+                hoursPerPerson={hours}
+                timesPerWeek={times}
+                hourlyRate={settings.hourlyRate}
                 companyName={settings.companyName}
                 companyAddress={settings.companyAddress}
                 companyPhone={settings.companyPhone}
@@ -234,5 +179,39 @@ const CleaningCalculator = () => {
     </div>
   );
 };
+
+function InputField({
+  id,
+  label,
+  icon,
+  placeholder,
+  value,
+  onChange,
+}: {
+  id: string;
+  label: string;
+  icon: React.ReactNode;
+  placeholder: string;
+  value: string;
+  onChange: (v: string) => void;
+}) {
+  return (
+    <div>
+      <label htmlFor={id} className="flex items-center gap-1.5 text-sm font-medium text-foreground mb-2">
+        {icon} {label}
+      </label>
+      <input
+        id={id}
+        type="number"
+        min="0"
+        step="1"
+        placeholder={placeholder}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="w-full rounded-xl border border-input bg-card px-4 py-3 text-lg font-semibold text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring transition"
+      />
+    </div>
+  );
+}
 
 export default CleaningCalculator;
