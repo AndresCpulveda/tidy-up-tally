@@ -16,7 +16,8 @@ const CleaningCalculator = () => {
   const times = parseFloat(timesPerWeek) || 0;
 
   const totalHoursPerWeek = people * hours * times;
-  const totalBill = totalHoursPerWeek * settings.hourlyRate;
+  const monthlyHours = (totalHoursPerWeek * 52) / 12;
+  const totalBill = monthlyHours * settings.hourlyRate;
   const hasInput = people > 0 && hours > 0 && times > 0;
 
   const generatePDF = () => {
@@ -53,6 +54,7 @@ const CleaningCalculator = () => {
       ["Times per Week", `${times}`],
       ["Hourly Rate", `€${settings.hourlyRate.toFixed(2)}`],
       ["Total Hours/Week", `${totalHoursPerWeek.toFixed(1)}`],
+      ["Monthly Hours (Est.)", `${monthlyHours.toFixed(1)}`],
     ];
 
     let y = 70;
@@ -70,7 +72,7 @@ const CleaningCalculator = () => {
     doc.setTextColor(255);
     doc.setFontSize(14);
     doc.setFont("helvetica", "bold");
-    doc.text(`To Bill: €${totalBill.toFixed(2)}`, 105, y + 14, { align: "center" });
+    doc.text(`To Bill (Monthly): €${totalBill.toFixed(2)}`, 105, y + 14, { align: "center" });
 
     doc.setTextColor(150);
     doc.setFontSize(9);
@@ -133,8 +135,8 @@ const CleaningCalculator = () => {
           </div>
           <div className="border-t border-primary-foreground/20" />
           <div className="flex justify-between items-center">
-            <div className="text-sm font-medium opacity-85">To Bill</div>
-            <div className="text-3xl font-bold tracking-tight">€{totalBill.toFixed(2)}</div>
+            <div className="text-sm font-medium opacity-85">Monthly Estimate</div>
+            <div className="text-3xl font-bold tracking-tight">€${totalBill.toFixed(2)}</div>
           </div>
           {!hasInput && (
             <div className="text-sm opacity-75 text-center">Enter details above to see your quote</div>
