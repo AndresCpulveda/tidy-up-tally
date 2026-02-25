@@ -94,7 +94,7 @@ const CleaningCalculator = () => {
           Cleaning Price Calculator
         </h1>
         <p className="mt-3 text-muted-foreground">
-          Enter your staffing details to get an instant estimate.
+          Enter your details to get an instant estimate.
         </p>
       </div>
 
