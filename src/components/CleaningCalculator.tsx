@@ -21,76 +21,169 @@ const CleaningCalculator = () => {
   const hasInput = people > 0 && hours > 0 && times > 0;
 
   const generatePDF = () => {
-    const doc = new jsPDF();
-    const date = new Date().toLocaleDateString();
+  const doc = new jsPDF({ unit: "pt", format: "a4" });
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const pageHeight = doc.internal.pageSize.getHeight();
 
-    doc.setFontSize(22);
-    doc.setFont("helvetica", "bold");
-    doc.text(settings.companyName || "Cleaning Service Proposal", 20, 25);
+  const margin = 60;
+  let y = margin;
 
-    doc.setFontSize(10);
-    doc.setFont("helvetica", "normal");
-    doc.setTextColor(100);
-    if (settings.companyAddress) doc.text(settings.companyAddress, 20, 33);
-    const contactLine = [settings.companyPhone, settings.companyEmail].filter(Boolean).join("  |  ");
-    if (contactLine) doc.text(contactLine, 20, 39);
+  const lineHeight = 18;
+  const sectionSpacing = 25;
 
-    doc.text(`Date: ${date}`, 190, 25, { align: "right" });
-    if (settings.billingDate) doc.text(`Terms: ${settings.billingDate}`, 190, 31, { align: "right" });
-
-    doc.setDrawColor(200);
-    doc.line(20, 45, 190, 45);
-
-    doc.setTextColor(40);
-    doc.setFontSize(16);
-    doc.setFont("helvetica", "bold");
-    doc.text("Cleaning Service Proposal", 20, 58);
-
-    doc.setFontSize(11);
-    doc.setFont("helvetica", "normal");
-    const details = [
-      ["Number of People", `${people}`],
-      ["Hours per Person", `${hours}`],
-      ["Times per Week", `${times}`],
-      ["Hourly Rate", `€${settings.hourlyRate.toFixed(2)}`],
-      ["Total Hours/Week", `${totalHoursPerWeek.toFixed(1)}`],
-      ["Monthly Hours (Est.)", `${monthlyHours.toFixed(1)}`],
-    ];
-
-    let y = 70;
-    details.forEach(([label, value]) => {
-      doc.setFont("helvetica", "bold");
-      doc.text(`${label}:`, 20, y);
-      doc.setFont("helvetica", "normal");
-      doc.text(value, 80, y);
-      y += 9;
-    });
-
-    y += 8;
-    doc.setFillColor(34, 120, 90);
-    doc.roundedRect(20, y, 170, 22, 3, 3, "F");
-    doc.setTextColor(255);
-    doc.setFontSize(14);
-    doc.setFont("helvetica", "bold");
-    doc.text(`To Bill (Monthly): €${totalBill.toFixed(2)}`, 105, y + 14, { align: "center" });
-
-    doc.setTextColor(150);
-    doc.setFontSize(9);
-    doc.setFont("helvetica", "normal");
-    doc.text("This is an estimate. Final pricing may vary based on on-site assessment.", 20, 280);
-
-    doc.save(`cleaning-proposal-${date}.pdf`);
+  const addPageIfNeeded = (requiredSpace = 20) => {
+    if (y + requiredSpace > pageHeight - margin) {
+      doc.addPage();
+      y = margin;
+    }
   };
 
+  const addText = (text, options = {}) => {
+    addPageIfNeeded(lineHeight);
+    doc.text(text, options.x || margin, y, options.align ? { align: options.align } : {});
+    y += lineHeight;
+  };
+
+  const addWrappedText = (text) => {
+    const splitText = doc.splitTextToSize(text, pageWidth - margin * 2);
+    splitText.forEach(line => {
+      addPageIfNeeded(lineHeight);
+      doc.text(line, margin, y);
+      y += lineHeight;
+    });
+  };
+
+  const date = new Date().toLocaleDateString();
+
+  /* -------------------------
+     TITLE
+  ------------------------- */
+
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(18);
+  addText("Cleaning Specifications", { align: "center", x: pageWidth / 2 });
+
+  y += sectionSpacing;
+
+  /* -------------------------
+     HEADER INFO
+  ------------------------- */
+
+  doc.setFontSize(12);
+  doc.setFont("helvetica", "normal");
+
+  addText(`Customer: ${settings.companyName || ""}`);
+  addText(`Location: ${settings.companyAddress || ""}`);
+  addText(`Contractor: Office Pride Commercial Cleaning Services`);
+  addText(`Date: ${date}`);
+
+  y += sectionSpacing;
+
+  /* -------------------------
+     TIMES PER WEEK
+  ------------------------- */
+
+  doc.setFont("helvetica", "bold");
+  addText(`Times Per Week (${times || ""})`);
+
+  y += 10;
+
+  doc.setFont("helvetica", "normal");
+
+  /* -------------------------
+     WEEKLY TASKS
+  ------------------------- */
+
+  const weeklyTasks = [
+    "Vacuum all carpet and floor mats.",
+    "Dust, mop and damp mop all tile floors.",
+    "Empty all trash and take to dumpster.",
+    "Clean entry door glass.",
+    "Spot clean glass and mirrors throughout office.",
+    "Clean and sanitize restrooms.",
+    "Refill toilet paper, soap and towel dispensers as needed from client’s supply.",
+    "Clean kitchenette, sink and surrounding countertop, and water fountain.",
+    "Dust uncovered areas of all desks, file cabinets, bookcases, counters and other furniture.",
+    "Dust windowsills, phones and computers.",
+    "Remove cobwebs from corners of ceilings and baseboards.",
+    "Spot clean new carpet spots (usually on request).",
+  ];
+
+  weeklyTasks.forEach(task => {
+    const splitText = doc.splitTextToSize("• " + task, pageWidth - margin * 2);
+    splitText.forEach(line => {
+      addPageIfNeeded(lineHeight);
+      doc.text(line, margin, y);
+      y += lineHeight;
+    });
+  });
+
+  y += sectionSpacing;
+
+  /* -------------------------
+     MONTHLY SECTION
+  ------------------------- */
+
+  doc.setFont("helvetica", "bold");
+  addText("Monthly");
+
+  y += 10;
+  doc.setFont("helvetica", "normal");
+
+  const monthlyTasks = [
+    "Dust baseboards (wash as needed).",
+    "Spot clean doors and walls.",
+    "Dust overhead vents and blinds.",
+  ];
+
+  monthlyTasks.forEach(task => {
+    const splitText = doc.splitTextToSize("• " + task, pageWidth - margin * 2);
+    splitText.forEach(line => {
+      addPageIfNeeded(lineHeight);
+      doc.text(line, margin, y);
+      y += lineHeight;
+    });
+  });
+
+  /* -------------------------
+     FOOTER
+  ------------------------- */
+
+  const totalPages = doc.getNumberOfPages();
+
+  for (let i = 1; i <= totalPages; i++) {
+    doc.setPage(i);
+
+    doc.setFontSize(9);
+    doc.setTextColor(120);
+
+    doc.text(
+      "Each Office Pride location is independently owned and operated.",
+      pageWidth / 2,
+      pageHeight - 30,
+      { align: "center" }
+    );
+
+    doc.text(
+      `Page ${i}`,
+      pageWidth - margin,
+      pageHeight - 30,
+      { align: "right" }
+    );
+  }
+
+  doc.save(`cleaning-specifications-${date}.pdf`);
+};
+
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center px-4 py-12">
+    <div className="flex flex-col items-center justify-center min-h-screen px-4 py-12">
       {/* Header */}
-      <div className="text-center mb-10 max-w-md">
+      <div className="max-w-md mb-10 text-center">
         <div className="inline-flex items-center gap-2 bg-accent text-accent-foreground px-4 py-1.5 rounded-full text-sm font-medium mb-4">
           <Sparkles className="w-4 h-4" />
           Instant Quote
         </div>
-        <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-foreground">
+        <h1 className="text-3xl font-bold tracking-tight sm:text-4xl text-foreground">
           Cleaning Price Calculator
         </h1>
         <p className="mt-3 text-muted-foreground">
@@ -128,28 +221,28 @@ const CleaningCalculator = () => {
         </div>
 
         {/* Result */}
-        <div className="rounded-xl bg-primary text-primary-foreground p-6 space-y-4">
-          <div className="flex justify-between items-center">
+        <div className="p-6 space-y-4 rounded-xl bg-primary text-primary-foreground">
+          <div className="flex items-center justify-between">
             <div className="text-sm font-medium opacity-85">Total Hours / Week</div>
             <div className="text-2xl font-bold tracking-tight">{totalHoursPerWeek.toFixed(1)} hrs</div>
           </div>
           <div className="border-t border-primary-foreground/20" />
-          <div className="flex justify-between items-center">
+          <div className="flex items-center justify-between">
             <div className="text-sm font-medium opacity-85">Monthly Estimate</div>
             <div className="text-3xl font-bold tracking-tight">€${totalBill.toFixed(2)}</div>
           </div>
           {!hasInput && (
-            <div className="text-sm opacity-75 text-center">Enter details above to see your quote</div>
+            <div className="text-sm text-center opacity-75">Enter details above to see your quote</div>
           )}
         </div>
 
         {/* Actions */}
-        <div className="flex gap-3 flex-wrap">
+        <div className="flex flex-wrap gap-3">
           {hasInput && (
             <>
               <button
                 onClick={generatePDF}
-                className="flex-1 flex items-center justify-center gap-2 rounded-xl border-2 border-primary bg-card px-4 py-3 font-semibold text-primary hover:bg-accent transition-all"
+                className="flex items-center justify-center flex-1 gap-2 px-4 py-3 font-semibold transition-all border-2 rounded-xl border-primary bg-card text-primary hover:bg-accent"
               >
                 <FileDown className="w-5 h-5" />
                 Download PDF
@@ -171,7 +264,7 @@ const CleaningCalculator = () => {
           )}
           <Link
             to="/settings"
-            className="flex items-center justify-center gap-2 rounded-xl border-2 border-border bg-card px-4 py-3 font-semibold text-muted-foreground hover:text-foreground hover:border-primary/40 transition-all"
+            className="flex items-center justify-center gap-2 px-4 py-3 font-semibold transition-all border-2 rounded-xl border-border bg-card text-muted-foreground hover:text-foreground hover:border-primary/40"
           >
             <Settings className="w-5 h-5" />
             Settings
@@ -210,7 +303,7 @@ function InputField({
         placeholder={placeholder}
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="w-full rounded-xl border border-input bg-card px-4 py-3 text-lg font-semibold text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring transition"
+        className="w-full px-4 py-3 text-lg font-semibold transition border rounded-xl border-input bg-card text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
       />
     </div>
   );
