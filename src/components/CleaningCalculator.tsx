@@ -1,9 +1,10 @@
 import { useState } from "react";
-import { Sparkles, FileDown, Settings, Users, Clock, CalendarDays } from "lucide-react";
+import { Sparkles, FileDown, FileText, Settings, Users, Clock, CalendarDays } from "lucide-react";
 import { Link } from "react-router-dom";
 import jsPDF from "jspdf";
 import { useTemplateSettings } from "@/context/TemplateSettingsContext";
 import EmailProposalDialog from "@/components/EmailProposalDialog";
+import { generateServiceAgreementPDF } from "@/utils/generateServiceAgreementPDF";
 
 const CleaningCalculator = () => {
   const { settings } = useTemplateSettings();
@@ -38,7 +39,7 @@ const CleaningCalculator = () => {
     }
   };
 
-  const addText = (text, options = {}) => {
+  const addText = (text: string, options: { x?: number; align?: "center" | "left" | "right" | "justify" } = {}) => {
     addPageIfNeeded(lineHeight);
     doc.text(text, options.x || margin, y, options.align ? { align: options.align } : {});
     y += lineHeight;
@@ -245,7 +246,27 @@ const CleaningCalculator = () => {
                 className="flex items-center justify-center flex-1 gap-2 px-4 py-3 font-semibold transition-all border-2 rounded-xl border-primary bg-card text-primary hover:bg-accent"
               >
                 <FileDown className="w-5 h-5" />
-                Download PDF
+                Proposal PDF
+              </button>
+              <button
+                onClick={() => generateServiceAgreementPDF({
+                  companyName: settings.companyName,
+                  companyAddress: settings.companyAddress,
+                  companyPhone: settings.companyPhone,
+                  companyEmail: settings.companyEmail,
+                  billingDate: settings.billingDate,
+                  numPeople: people,
+                  hoursPerPerson: hours,
+                  timesPerWeek: times,
+                  hourlyRate: settings.hourlyRate,
+                  totalHoursPerWeek,
+                  monthlyHours,
+                  totalBill,
+                })}
+                className="flex items-center justify-center flex-1 gap-2 px-4 py-3 font-semibold transition-all border-2 rounded-xl border-primary bg-card text-primary hover:bg-accent"
+              >
+                <FileText className="w-5 h-5" />
+                Agreement PDF
               </button>
               <EmailProposalDialog
                 totalHoursPerWeek={totalHoursPerWeek}
@@ -259,6 +280,7 @@ const CleaningCalculator = () => {
                 companyPhone={settings.companyPhone}
                 companyEmail={settings.companyEmail}
                 billingDate={settings.billingDate}
+                monthlyHours={monthlyHours}
               />
             </>
           )}
