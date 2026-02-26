@@ -1,7 +1,7 @@
 import { useState } from "react";
 import {
   Sparkles, FileDown, FileText, Settings, Users, Clock, CalendarDays,
-  ArrowRight, ArrowLeft, Building2, Phone, Mail as MailIcon, Globe,
+  ArrowRight, ArrowLeft, Building2, Phone, Mail as MailIcon, Globe, Palette,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import jsPDF from "jspdf";
@@ -58,14 +58,14 @@ const CleaningCalculator = () => {
 
     doc.setFont("helvetica", "bold");
     doc.setFontSize(18);
-    addText("Cleaning Specifications", { align: "center", x: pageWidth / 2 });
+    addText(settings.proposalTemplate.title, { align: "center", x: pageWidth / 2 });
     y += sectionSpacing;
 
     doc.setFontSize(12);
     doc.setFont("helvetica", "normal");
     addText(`Customer: ${clientName}`);
     addText(`Location: ${clientAddress}`);
-    addText(`Contractor: Office Pride Commercial Cleaning Services`);
+    addText(`Contractor: ${settings.proposalTemplate.contractorName}`);
     addText(`Date: ${date}`);
     y += sectionSpacing;
 
@@ -74,21 +74,18 @@ const CleaningCalculator = () => {
     y += 10;
     doc.setFont("helvetica", "normal");
 
-    const weeklyTasks = [
-      "Vacuum all carpet and floor mats.",
-      "Dust, mop and damp mop all tile floors.",
-      "Empty all trash and take to dumpster.",
-      "Clean entry door glass.",
-      "Spot clean glass and mirrors throughout office.",
-      "Clean and sanitize restrooms.",
-      "Refill toilet paper, soap and towel dispensers as needed from client's supply.",
-      "Clean kitchenette, sink and surrounding countertop, and water fountain.",
-      "Dust uncovered areas of all desks, file cabinets, bookcases, counters and other furniture.",
-      "Dust windowsills, phones and computers.",
-      "Remove cobwebs from corners of ceilings and baseboards.",
-      "Spot clean new carpet spots (usually on request).",
-    ];
+    const weeklyTasks = settings.proposalTemplate.weeklyTasks;
     weeklyTasks.forEach(task => {
+      const splitText = doc.splitTextToSize("• " + task, pageWidth - margin * 2);
+      splitText.forEach(line => { addPageIfNeeded(lineHeight); doc.text(line, margin, y); y += lineHeight; });
+    });
+    y += sectionSpacing;
+
+    doc.setFont("helvetica", "bold");
+    addText("Monthly");
+    y += 10;
+    doc.setFont("helvetica", "normal");
+    settings.proposalTemplate.monthlyTasks.forEach(task => {
       const splitText = doc.splitTextToSize("• " + task, pageWidth - margin * 2);
       splitText.forEach(line => { addPageIfNeeded(lineHeight); doc.text(line, margin, y); y += lineHeight; });
     });
@@ -108,7 +105,7 @@ const CleaningCalculator = () => {
       doc.setPage(i);
       doc.setFontSize(9);
       doc.setTextColor(120);
-      doc.text("Each Office Pride location is independently owned and operated.", pageWidth / 2, pageHeight - 30, { align: "center" });
+      doc.text(settings.proposalTemplate.footerText, pageWidth / 2, pageHeight - 30, { align: "center" });
       doc.text(`Page ${i}`, pageWidth - margin, pageHeight - 30, { align: "right" });
     }
     doc.save(`cleaning-specifications-${date}.pdf`);
@@ -164,6 +161,13 @@ const CleaningCalculator = () => {
               >
                 <Settings className="w-5 h-5" />
                 Settings
+              </Link>
+              <Link
+                to="/templates"
+                className="flex items-center justify-center gap-2 px-4 py-3 font-semibold transition-all border-2 rounded-xl border-border bg-card text-muted-foreground hover:text-foreground hover:border-primary/40"
+              >
+                <Palette className="w-5 h-5" />
+                Templates
               </Link>
             </div>
           </>
@@ -227,6 +231,9 @@ const CleaningCalculator = () => {
                       totalHoursPerWeek,
                       monthlyHours,
                       totalBill,
+                      agreementTitle: settings.agreementTemplate.title,
+                      termText: settings.agreementTemplate.termText,
+                      footerDisclaimer: settings.agreementTemplate.footerDisclaimer,
                     })}
                     className="flex items-center justify-center flex-1 gap-2 px-4 py-3 font-semibold transition-all border-2 rounded-xl border-primary bg-card text-primary hover:bg-accent"
                   >
@@ -255,6 +262,13 @@ const CleaningCalculator = () => {
               >
                 <Settings className="w-5 h-5" />
                 Settings
+              </Link>
+              <Link
+                to="/templates"
+                className="flex items-center justify-center gap-2 px-4 py-3 font-semibold transition-all border-2 rounded-xl border-border bg-card text-muted-foreground hover:text-foreground hover:border-primary/40"
+              >
+                <Palette className="w-5 h-5" />
+                Templates
               </Link>
             </div>
           </>

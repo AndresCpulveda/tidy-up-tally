@@ -1,5 +1,19 @@
 import { createContext, useContext, useState, ReactNode } from "react";
 
+export interface ProposalTemplate {
+  title: string;
+  contractorName: string;
+  weeklyTasks: string[];
+  monthlyTasks: string[];
+  footerText: string;
+}
+
+export interface AgreementTemplate {
+  title: string;
+  termText: string;
+  footerDisclaimer: string;
+}
+
 export interface TemplateSettings {
   companyName: string;
   companyAddress: string;
@@ -8,7 +22,40 @@ export interface TemplateSettings {
   logoUrl: string;
   billingDate: string;
   hourlyRate: number;
+  proposalTemplate: ProposalTemplate;
+  agreementTemplate: AgreementTemplate;
 }
+
+const defaultProposalTemplate: ProposalTemplate = {
+  title: "Cleaning Specifications",
+  contractorName: "Office Pride Commercial Cleaning Services",
+  weeklyTasks: [
+    "Vacuum all carpet and floor mats.",
+    "Dust, mop and damp mop all tile floors.",
+    "Empty all trash and take to dumpster.",
+    "Clean entry door glass.",
+    "Spot clean glass and mirrors throughout office.",
+    "Clean and sanitize restrooms.",
+    "Refill toilet paper, soap and towel dispensers as needed from client's supply.",
+    "Clean kitchenette, sink and surrounding countertop, and water fountain.",
+    "Dust uncovered areas of all desks, file cabinets, bookcases, counters and other furniture.",
+    "Dust windowsills, phones and computers.",
+    "Remove cobwebs from corners of ceilings and baseboards.",
+    "Spot clean new carpet spots (usually on request).",
+  ],
+  monthlyTasks: [
+    "Dust baseboards (wash as needed).",
+    "Spot clean doors and walls.",
+    "Dust overhead vents and blinds.",
+  ],
+  footerText: "Each Office Pride location is independently owned and operated.",
+};
+
+const defaultAgreementTemplate: AgreementTemplate = {
+  title: "Service Agreement",
+  termText: "This agreement commences on the date signed below and continues on a month-to-month basis. Either party may terminate with 30 days written notice.",
+  footerDisclaimer: "This document is a template and may require legal review before use.",
+};
 
 const defaultSettings: TemplateSettings = {
   companyName: "CleanPro Services",
@@ -18,6 +65,8 @@ const defaultSettings: TemplateSettings = {
   logoUrl: "",
   billingDate: "Due upon receipt",
   hourlyRate: 25,
+  proposalTemplate: defaultProposalTemplate,
+  agreementTemplate: defaultAgreementTemplate,
 };
 
 interface TemplateSettingsContextType {
