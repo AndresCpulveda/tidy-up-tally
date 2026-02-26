@@ -13,6 +13,9 @@ interface ServiceAgreementData {
   totalHoursPerWeek: number;
   monthlyHours: number;
   totalBill: number;
+  agreementTitle?: string;
+  termText?: string;
+  footerDisclaimer?: string;
 }
 
 export function generateServiceAgreementPDF(data: ServiceAgreementData) {
@@ -23,7 +26,7 @@ export function generateServiceAgreementPDF(data: ServiceAgreementData) {
   // Header
   doc.setFontSize(22);
   doc.setFont("helvetica", "bold");
-  doc.text("Service Agreement", 105, y, { align: "center" });
+  doc.text(data.agreementTitle || "Service Agreement", 105, y, { align: "center" });
   y += 12;
 
   doc.setFontSize(10);
@@ -109,8 +112,9 @@ export function generateServiceAgreementPDF(data: ServiceAgreementData) {
   y += 8;
   doc.setFontSize(10);
   doc.setFont("helvetica", "normal");
-  doc.text("This agreement commences on the date signed below and continues on a", 20, y); y += 6;
-  doc.text("month-to-month basis. Either party may terminate with 30 days written notice.", 20, y);
+  const termText = data.termText || "This agreement commences on the date signed below and continues on a month-to-month basis. Either party may terminate with 30 days written notice.";
+  const termLines = doc.splitTextToSize(termText, 170);
+  termLines.forEach((line: string) => { doc.text(line, 20, y); y += 6; });
   y += 14;
 
   // Signatures
@@ -128,7 +132,7 @@ export function generateServiceAgreementPDF(data: ServiceAgreementData) {
   // Footer
   doc.setTextColor(150);
   doc.setFontSize(8);
-  doc.text("This document is a template and may require legal review before use.", 20, 285);
+  doc.text(data.footerDisclaimer || "This document is a template and may require legal review before use.", 20, 285);
 
   doc.save(`service-agreement-${date}.pdf`);
 }
@@ -140,7 +144,7 @@ export function buildServiceAgreementHtml(data: ServiceAgreementData): string {
 
   return `
     <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:24px;">
-      <h1 style="text-align:center;color:#1a1a1a;font-size:22px;">Service Agreement</h1>
+      <h1 style="text-align:center;color:#1a1a1a;font-size:22px;">${data.agreementTitle || "Service Agreement"}</h1>
       <p style="text-align:center;color:#666;font-size:12px;">Date: ${date}</p>
       <hr style="border:none;border-top:1px solid #e5e5e5;margin:16px 0;" />
 
@@ -166,9 +170,9 @@ export function buildServiceAgreementHtml(data: ServiceAgreementData): string {
       ${data.billingDate ? `<p style="margin-top:8px;color:#666;font-size:12px;">Payment Terms: ${data.billingDate}</p>` : ""}
 
       <h3 style="color:#1a1a1a;">4. Term & Termination</h3>
-      <p style="font-size:13px;color:#333;">This agreement continues month-to-month. Either party may terminate with 30 days written notice.</p>
+      <p style="font-size:13px;color:#333;">${data.termText || "This agreement continues month-to-month. Either party may terminate with 30 days written notice."}</p>
 
-      <p style="margin-top:24px;color:#999;font-size:11px;">This document is a template and may require legal review before use.</p>
+      <p style="margin-top:24px;color:#999;font-size:11px;">${data.footerDisclaimer || "This document is a template and may require legal review before use."}</p>
     </div>
   `;
 }
