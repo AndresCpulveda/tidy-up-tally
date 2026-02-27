@@ -1,11 +1,15 @@
 import jsPDF from "jspdf";
 
 interface ServiceAgreementData {
-  companyName: string;
-  companyAddress: string;
-  companyPhone: string;
-  companyEmail: string;
-  billingDate: string;
+  // Provider info
+  providerName: string;
+  providerDBA: string;
+  // Client info
+  clientName: string;
+  clientAddress: string;
+  // Date
+  date: string;
+  // Service details
   numPeople: number;
   hoursPerPerson: number;
   timesPerWeek: number;
@@ -13,166 +17,261 @@ interface ServiceAgreementData {
   totalHoursPerWeek: number;
   monthlyHours: number;
   totalBill: number;
-  agreementTitle?: string;
-  termText?: string;
-  footerDisclaimer?: string;
+  billingDate: string;
+  // Template content
+  contractorResponsibilities: string[];
+  customerResponsibilities: string[];
+  insuranceText: string;
+  periodText: string;
+  changesText: string;
+  extraServices: { label: string; price: string }[];
+  invoiceNote: string;
+  thirdPartyNote: string;
+  signaturesNote: string;
+  pricesValidDays: string;
+  copyrightText: string;
+  footerDisclaimer: string;
 }
 
 export function generateServiceAgreementPDF(data: ServiceAgreementData) {
-  const doc = new jsPDF();
-  const date = new Date().toLocaleDateString();
-  let y = 25;
+  const doc = new jsPDF({ unit: "pt", format: "a4" });
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const pageHeight = doc.internal.pageSize.getHeight();
+  const margin = 50;
+  const contentWidth = pageWidth - margin * 2;
+  let y = margin;
+  const lineHeight = 16;
+  const sectionGap = 20;
 
-  // Header
-  doc.setFontSize(22);
-  doc.setFont("helvetica", "bold");
-  doc.text(data.agreementTitle || "Service Agreement", 105, y, { align: "center" });
-  y += 12;
+  const addPageIfNeeded = (space = 30) => {
+    if (y + space > pageHeight - 60) {
+      addFooter();
+      doc.addPage();
+      y = margin;
+    }
+  };
 
-  doc.setFontSize(10);
-  doc.setFont("helvetica", "normal");
-  doc.setTextColor(100);
-  doc.text(`Date: ${date}`, 105, y, { align: "center" });
-  y += 12;
-
-  doc.setDrawColor(200);
-  doc.line(20, y, 190, y);
-  y += 12;
-
-  // Parties
-  doc.setTextColor(40);
-  doc.setFontSize(13);
-  doc.setFont("helvetica", "bold");
-  doc.text("1. Parties", 20, y);
-  y += 8;
-
-  doc.setFontSize(10);
-  doc.setFont("helvetica", "normal");
-  const provider = data.companyName || "Service Provider";
-  doc.text(`Service Provider: ${provider}`, 20, y);
-  y += 6;
-  if (data.companyAddress) { doc.text(`Address: ${data.companyAddress}`, 20, y); y += 6; }
-  const contact = [data.companyPhone, data.companyEmail].filter(Boolean).join("  |  ");
-  if (contact) { doc.text(`Contact: ${contact}`, 20, y); y += 6; }
-  y += 4;
-  doc.text("Client: ___________________________________________", 20, y);
-  y += 6;
-  doc.text("Address: ___________________________________________", 20, y);
-  y += 12;
-
-  // Scope of Services
-  doc.setFontSize(13);
-  doc.setFont("helvetica", "bold");
-  doc.text("2. Scope of Services", 20, y);
-  y += 8;
-
-  doc.setFontSize(10);
-  doc.setFont("helvetica", "normal");
-  doc.text(`The Provider agrees to supply ${data.numPeople} cleaning staff member(s),`, 20, y); y += 6;
-  doc.text(`each working ${data.hoursPerPerson} hour(s) per visit, ${data.timesPerWeek} time(s) per week.`, 20, y); y += 10;
-
-  const rows = [
-    ["Staff Members", `${data.numPeople}`],
-    ["Hours per Person per Visit", `${data.hoursPerPerson}`],
-    ["Visits per Week", `${data.timesPerWeek}`],
-    ["Total Hours per Week", `${data.totalHoursPerWeek.toFixed(1)}`],
-    ["Estimated Monthly Hours", `${data.monthlyHours.toFixed(1)}`],
-  ];
-
-  rows.forEach(([label, value]) => {
-    doc.setFont("helvetica", "bold");
-    doc.text(`${label}:`, 24, y);
+  const addFooter = () => {
+    const page = doc.getNumberOfPages();
+    doc.setFontSize(8);
+    doc.setTextColor(130);
     doc.setFont("helvetica", "normal");
-    doc.text(value, 90, y);
-    y += 7;
-  });
-  y += 6;
+    doc.text(
+      `${data.providerDBA || data.providerName} – Service Agreement – Page ${page}`,
+      pageWidth / 2,
+      pageHeight - 30,
+      { align: "center" }
+    );
+  };
 
-  // Compensation
-  doc.setFontSize(13);
+  const addWrappedText = (text: string, x: number, maxWidth: number) => {
+    const lines: string[] = doc.splitTextToSize(text, maxWidth);
+    lines.forEach((line: string) => {
+      addPageIfNeeded(lineHeight);
+      doc.text(line, x, y);
+      y += lineHeight;
+    });
+  };
+
+  const addBulletList = (items: string[]) => {
+    items.forEach((item) => {
+      addPageIfNeeded(lineHeight);
+      doc.text("•", margin + 8, y);
+      const lines: string[] = doc.splitTextToSize(item, contentWidth - 24);
+      lines.forEach((line: string, li: number) => {
+        if (li > 0) addPageIfNeeded(lineHeight);
+        doc.text(line, margin + 22, y);
+        y += lineHeight;
+      });
+    });
+  };
+
+  const addSectionHeader = (num: string, title: string) => {
+    addPageIfNeeded(40);
+    y += sectionGap;
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(12);
+    doc.setTextColor(30);
+    doc.text(`${num}. ${title}`, margin, y);
+    y += lineHeight + 4;
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(10);
+    doc.setTextColor(50);
+  };
+
+  // ============ HEADER ============
   doc.setFont("helvetica", "bold");
-  doc.text("3. Compensation", 20, y);
-  y += 8;
+  doc.setFontSize(16);
+  doc.setTextColor(30);
+  doc.text(data.providerDBA || data.providerName, pageWidth / 2, y, { align: "center" });
+  y += lineHeight + 2;
 
   doc.setFontSize(10);
+  doc.setTextColor(80);
   doc.setFont("helvetica", "normal");
-  doc.text(`Hourly Rate: €${data.hourlyRate.toFixed(2)}`, 24, y); y += 7;
-  doc.setFont("helvetica", "bold");
-  doc.text(`Monthly Fee: €${data.totalBill.toFixed(2)}`, 24, y); y += 7;
-  doc.setFont("helvetica", "normal");
-  if (data.billingDate) {
-    doc.text(`Payment Terms: ${data.billingDate}`, 24, y); y += 7;
+  doc.text("Service Agreement – Page 1", pageWidth - margin, y, { align: "right" });
+  y += sectionGap;
+
+  // Customer / Date / Location / Contractor
+  doc.setFontSize(10);
+  doc.setTextColor(50);
+  const infoRows = [
+    ["Customer:", data.clientName],
+    ["Date:", data.date],
+    ["Location:", data.clientAddress],
+    ["Contractor:", data.providerName],
+  ];
+  if (data.providerDBA) {
+    infoRows.push(["DBA:", data.providerDBA]);
   }
-  y += 6;
+  infoRows.forEach(([label, value]) => {
+    doc.setFont("helvetica", "bold");
+    doc.text(label, margin, y);
+    doc.setFont("helvetica", "normal");
+    doc.text(value || "", margin + 80, y);
+    y += lineHeight;
+  });
 
-  // Terms
-  doc.setFontSize(13);
-  doc.setFont("helvetica", "bold");
-  doc.text("4. Term & Termination", 20, y);
-  y += 8;
-  doc.setFontSize(10);
-  doc.setFont("helvetica", "normal");
-  const termText = data.termText || "This agreement commences on the date signed below and continues on a month-to-month basis. Either party may terminate with 30 days written notice.";
-  const termLines = doc.splitTextToSize(termText, 170);
-  termLines.forEach((line: string) => { doc.text(line, 20, y); y += 6; });
-  y += 14;
+  // ============ I. Contractor Responsibility ============
+  addSectionHeader("I", "Contractor Responsibility");
+  addBulletList(data.contractorResponsibilities);
 
-  // Signatures
-  doc.setFontSize(13);
-  doc.setFont("helvetica", "bold");
-  doc.text("5. Signatures", 20, y);
-  y += 12;
+  // ============ II. Customer Responsibility ============
+  addSectionHeader("II", "Customer Responsibility");
+  addBulletList(data.customerResponsibilities);
 
-  doc.setFontSize(10);
-  doc.setFont("helvetica", "normal");
-  doc.text("Provider: ______________________________    Date: ______________", 20, y);
-  y += 12;
-  doc.text("Client:     ______________________________    Date: ______________", 20, y);
+  // ============ III. Insurance Coverage ============
+  addSectionHeader("III", "Insurance Coverage");
+  addWrappedText(data.insuranceText, margin, contentWidth);
 
-  // Footer
-  doc.setTextColor(150);
+  // ============ IV. Period of Agreement ============
+  addSectionHeader("IV", "Period of Agreement");
+  const periodFull = `Service will commence the ${data.date} and continue. ${data.periodText}`;
+  addWrappedText(periodFull, margin, contentWidth);
+
+  // ============ V. Changes in Specifications ============
+  addSectionHeader("V", "Changes in Specifications or Frequencies");
+  addWrappedText(data.changesText, margin, contentWidth);
+
+  // ============ VI. Cost of Service and Invoicing ============
+  addSectionHeader("VI", "Cost of Service and Invoicing");
+
+  const costText = `a. Customer agrees to pay contractor the sum of €${data.totalBill.toFixed(2)} per month for service(s) ${data.timesPerWeek} time(s) per week, ${data.numPeople} staff member(s), ${data.hoursPerPerson} hour(s) each.`;
+  addWrappedText(costText, margin, contentWidth);
+  y += 4;
+
+  if (data.billingDate) {
+    addWrappedText(`b. Payment Terms: ${data.billingDate}`, margin, contentWidth);
+    y += 4;
+  }
+
+  addWrappedText(`c. ${data.invoiceNote}`, margin, contentWidth);
+  y += 4;
+
+  addWrappedText("d. Unless noted, customer agrees that the following services are separate from this contract and can be quoted upon request:", margin, contentWidth);
+  y += 4;
+
+  data.extraServices.forEach((svc) => {
+    addPageIfNeeded(lineHeight);
+    doc.text(`•  ${svc.label}`, margin + 8, y);
+    const priceX = pageWidth - margin;
+    doc.text(svc.price, priceX, y, { align: "right" });
+    y += lineHeight;
+  });
+  y += 4;
+
+  addWrappedText(`e. ${data.thirdPartyNote}`, margin, contentWidth);
+
+  // ============ VII. Signatures ============
+  addSectionHeader("VII", "Signatures");
+  addWrappedText(data.signaturesNote, margin, contentWidth);
+  y += 10;
+
+  const sigRows = [
+    ["Customer:", data.clientName],
+    ["Contractor:", data.providerDBA || data.providerName],
+  ];
+  sigRows.forEach(([label, value]) => {
+    addPageIfNeeded(50);
+    doc.setFont("helvetica", "bold");
+    doc.text(label, margin, y);
+    doc.setFont("helvetica", "normal");
+    doc.text(value || "", margin + 80, y);
+    y += lineHeight;
+    doc.text("Printed Name: ______________________________", margin + 20, y);
+    y += lineHeight;
+    doc.text("Signature:      ______________________________     Date: ______________", margin + 20, y);
+    y += lineHeight + 10;
+  });
+
+  // Bottom notes
+  y += 10;
+  addPageIfNeeded(40);
   doc.setFontSize(8);
-  doc.text(data.footerDisclaimer || "This document is a template and may require legal review before use.", 20, 285);
+  doc.setTextColor(120);
+  if (data.pricesValidDays) {
+    doc.text(data.pricesValidDays, margin, y);
+    y += 12;
+  }
+  if (data.copyrightText) {
+    doc.text(data.copyrightText, margin, y);
+    y += 12;
+  }
 
-  doc.save(`service-agreement-${date}.pdf`);
+  // Add footer to all pages
+  const totalPages = doc.getNumberOfPages();
+  for (let i = 1; i <= totalPages; i++) {
+    doc.setPage(i);
+    doc.setFontSize(8);
+    doc.setTextColor(130);
+    doc.setFont("helvetica", "normal");
+    doc.text(data.footerDisclaimer, pageWidth / 2, pageHeight - 20, { align: "center" });
+  }
+
+  doc.save(`service-agreement-${data.date}.pdf`);
 }
 
 export function buildServiceAgreementHtml(data: ServiceAgreementData): string {
-  const date = new Date().toLocaleDateString();
-  const provider = data.companyName || "Service Provider";
-  const contact = [data.companyAddress, data.companyPhone, data.companyEmail].filter(Boolean).join(" · ");
+  const bulletHtml = (items: string[]) =>
+    items.map((i) => `<li style="margin-bottom:4px;">${i}</li>`).join("");
 
   return `
-    <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:24px;">
-      <h1 style="text-align:center;color:#1a1a1a;font-size:22px;">${data.agreementTitle || "Service Agreement"}</h1>
-      <p style="text-align:center;color:#666;font-size:12px;">Date: ${date}</p>
+    <div style="font-family:Arial,sans-serif;max-width:650px;margin:0 auto;padding:24px;">
+      <h1 style="text-align:center;color:#1a1a1a;font-size:20px;">${data.providerDBA || data.providerName}</h1>
+      <p style="text-align:center;color:#666;font-size:12px;">Service Agreement</p>
       <hr style="border:none;border-top:1px solid #e5e5e5;margin:16px 0;" />
 
-      <h3 style="color:#1a1a1a;">1. Parties</h3>
-      <p style="color:#333;font-size:13px;"><strong>Provider:</strong> ${provider}</p>
-      ${contact ? `<p style="color:#666;font-size:12px;">${contact}</p>` : ""}
-      <p style="color:#333;font-size:13px;"><strong>Client:</strong> (to be completed)</p>
-
-      <h3 style="color:#1a1a1a;">2. Scope of Services</h3>
-      <table style="width:100%;border-collapse:collapse;margin:8px 0;">
-        <tr><td style="padding:6px 0;color:#666;font-size:13px;">Staff Members</td><td style="padding:6px 0;font-weight:600;font-size:13px;">${data.numPeople}</td></tr>
-        <tr><td style="padding:6px 0;color:#666;font-size:13px;">Hours per Person</td><td style="padding:6px 0;font-size:13px;">${data.hoursPerPerson}</td></tr>
-        <tr><td style="padding:6px 0;color:#666;font-size:13px;">Visits per Week</td><td style="padding:6px 0;font-size:13px;">${data.timesPerWeek}</td></tr>
-        <tr><td style="padding:6px 0;color:#666;font-size:13px;">Total Hours/Week</td><td style="padding:6px 0;font-weight:600;font-size:13px;">${data.totalHoursPerWeek.toFixed(1)}</td></tr>
-        <tr><td style="padding:6px 0;color:#666;font-size:13px;">Monthly Hours (Est.)</td><td style="padding:6px 0;font-size:13px;">${data.monthlyHours.toFixed(1)}</td></tr>
+      <table style="width:100%;font-size:13px;color:#333;margin-bottom:16px;">
+        <tr><td style="padding:4px 0;font-weight:600;width:100px;">Customer:</td><td>${data.clientName}</td></tr>
+        <tr><td style="padding:4px 0;font-weight:600;">Date:</td><td>${data.date}</td></tr>
+        <tr><td style="padding:4px 0;font-weight:600;">Location:</td><td>${data.clientAddress}</td></tr>
+        <tr><td style="padding:4px 0;font-weight:600;">Contractor:</td><td>${data.providerName}</td></tr>
       </table>
 
-      <h3 style="color:#1a1a1a;">3. Compensation</h3>
-      <p style="font-size:13px;color:#333;">Hourly Rate: <strong>€${data.hourlyRate.toFixed(2)}</strong></p>
+      <h3 style="color:#1a1a1a;">I. Contractor Responsibility</h3>
+      <ul style="font-size:13px;color:#333;">${bulletHtml(data.contractorResponsibilities)}</ul>
+
+      <h3 style="color:#1a1a1a;">II. Customer Responsibility</h3>
+      <ul style="font-size:13px;color:#333;">${bulletHtml(data.customerResponsibilities)}</ul>
+
+      <h3 style="color:#1a1a1a;">III. Insurance Coverage</h3>
+      <p style="font-size:13px;color:#333;">${data.insuranceText}</p>
+
+      <h3 style="color:#1a1a1a;">IV. Period of Agreement</h3>
+      <p style="font-size:13px;color:#333;">${data.periodText}</p>
+
+      <h3 style="color:#1a1a1a;">V. Changes in Specifications</h3>
+      <p style="font-size:13px;color:#333;">${data.changesText}</p>
+
+      <h3 style="color:#1a1a1a;">VI. Cost of Service</h3>
       <div style="background:#22785a;color:#fff;padding:12px;border-radius:8px;text-align:center;font-size:18px;font-weight:700;">
         Monthly Fee: €${data.totalBill.toFixed(2)}
       </div>
-      ${data.billingDate ? `<p style="margin-top:8px;color:#666;font-size:12px;">Payment Terms: ${data.billingDate}</p>` : ""}
 
-      <h3 style="color:#1a1a1a;">4. Term & Termination</h3>
-      <p style="font-size:13px;color:#333;">${data.termText || "This agreement continues month-to-month. Either party may terminate with 30 days written notice."}</p>
+      <h3 style="color:#1a1a1a;">VII. Signatures</h3>
+      <p style="font-size:12px;color:#666;">${data.signaturesNote}</p>
 
-      <p style="margin-top:24px;color:#999;font-size:11px;">${data.footerDisclaimer || "This document is a template and may require legal review before use."}</p>
+      <p style="margin-top:24px;color:#999;font-size:11px;">${data.footerDisclaimer}</p>
     </div>
   `;
 }
