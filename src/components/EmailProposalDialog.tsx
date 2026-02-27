@@ -10,6 +10,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useTemplateSettings } from "@/context/TemplateSettingsContext";
 import { buildServiceAgreementHtml } from "@/utils/generateServiceAgreementPDF";
 
 interface EmailProposalDialogProps {
@@ -47,7 +48,7 @@ export default function EmailProposalDialog({
   const [includeProposal, setIncludeProposal] = useState(true);
   const [includeAgreement, setIncludeAgreement] = useState(true);
   const { toast } = useToast();
-
+  const { settings } = useTemplateSettings();
   const buildProposalHtml = () => `
     <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:24px;">
       <h1 style="color:#1a1a1a;font-size:22px;">${companyName || "Cleaning Service Proposal"}</h1>
@@ -71,9 +72,15 @@ export default function EmailProposalDialog({
   `;
 
   const agreementData = {
-    companyName, companyAddress, companyPhone, companyEmail, billingDate,
+    providerName: settings.companyName,
+    providerDBA: settings.proposalTemplate.contractorName,
+    clientName: companyName,
+    clientAddress: companyAddress,
+    date: new Date().toLocaleDateString(),
     numPeople, hoursPerPerson, timesPerWeek, hourlyRate,
     totalHoursPerWeek, monthlyHours, totalBill,
+    billingDate,
+    ...settings.agreementTemplate,
   };
 
   const handleSend = async () => {

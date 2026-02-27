@@ -219,11 +219,11 @@ const CleaningCalculator = () => {
                   </button>
                   <button
                     onClick={() => generateServiceAgreementPDF({
-                      companyName: clientName,
-                      companyAddress: clientAddress,
-                      companyPhone: clientPhone,
-                      companyEmail: clientEmail,
-                      billingDate: billingTerms,
+                      providerName: settings.companyName,
+                      providerDBA: settings.proposalTemplate.contractorName,
+                      clientName,
+                      clientAddress,
+                      date: new Date().toLocaleDateString(),
                       numPeople: people,
                       hoursPerPerson: hours,
                       timesPerWeek: times,
@@ -231,9 +231,8 @@ const CleaningCalculator = () => {
                       totalHoursPerWeek,
                       monthlyHours,
                       totalBill,
-                      agreementTitle: settings.agreementTemplate.title,
-                      termText: settings.agreementTemplate.termText,
-                      footerDisclaimer: settings.agreementTemplate.footerDisclaimer,
+                      billingDate: billingTerms,
+                      ...settings.agreementTemplate,
                     })}
                     className="flex items-center justify-center flex-1 gap-2 px-4 py-3 font-semibold transition-all border-2 rounded-xl border-primary bg-card text-primary hover:bg-accent"
                   >

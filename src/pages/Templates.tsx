@@ -9,6 +9,10 @@ const Templates = () => {
 
   const [newWeeklyTask, setNewWeeklyTask] = useState("");
   const [newMonthlyTask, setNewMonthlyTask] = useState("");
+  const [newContractorResp, setNewContractorResp] = useState("");
+  const [newCustomerResp, setNewCustomerResp] = useState("");
+  const [newExtraLabel, setNewExtraLabel] = useState("");
+  const [newExtraPrice, setNewExtraPrice] = useState("");
 
   const updateProposal = (partial: Partial<typeof proposalTemplate>) => {
     updateSettings({ proposalTemplate: { ...proposalTemplate, ...partial } });
@@ -36,6 +40,37 @@ const Templates = () => {
 
   const removeMonthlyTask = (index: number) => {
     updateProposal({ monthlyTasks: proposalTemplate.monthlyTasks.filter((_, i) => i !== index) });
+  };
+
+  const addContractorResp = () => {
+    if (!newContractorResp.trim()) return;
+    updateAgreement({ contractorResponsibilities: [...agreementTemplate.contractorResponsibilities, newContractorResp.trim()] });
+    setNewContractorResp("");
+  };
+
+  const removeContractorResp = (index: number) => {
+    updateAgreement({ contractorResponsibilities: agreementTemplate.contractorResponsibilities.filter((_, i) => i !== index) });
+  };
+
+  const addCustomerResp = () => {
+    if (!newCustomerResp.trim()) return;
+    updateAgreement({ customerResponsibilities: [...agreementTemplate.customerResponsibilities, newCustomerResp.trim()] });
+    setNewCustomerResp("");
+  };
+
+  const removeCustomerResp = (index: number) => {
+    updateAgreement({ customerResponsibilities: agreementTemplate.customerResponsibilities.filter((_, i) => i !== index) });
+  };
+
+  const addExtraService = () => {
+    if (!newExtraLabel.trim()) return;
+    updateAgreement({ extraServices: [...agreementTemplate.extraServices, { label: newExtraLabel.trim(), price: newExtraPrice.trim() }] });
+    setNewExtraLabel("");
+    setNewExtraPrice("");
+  };
+
+  const removeExtraService = (index: number) => {
+    updateAgreement({ extraServices: agreementTemplate.extraServices.filter((_, i) => i !== index) });
   };
 
   return (
@@ -67,75 +102,27 @@ const Templates = () => {
           <Field label="Document Title" value={proposalTemplate.title} onChange={(v) => updateProposal({ title: v })} />
           <Field label="Contractor Name" value={proposalTemplate.contractorName} onChange={(v) => updateProposal({ contractorName: v })} />
 
-          {/* Weekly Tasks */}
-          <div>
-            <label className="block text-sm font-medium text-foreground mb-2">Weekly Tasks</label>
-            <div className="space-y-2">
-              {proposalTemplate.weeklyTasks.map((task, i) => (
-                <div key={i} className="flex items-start gap-2">
-                  <input
-                    value={task}
-                    onChange={(e) => {
-                      const updated = [...proposalTemplate.weeklyTasks];
-                      updated[i] = e.target.value;
-                      updateProposal({ weeklyTasks: updated });
-                    }}
-                    className="flex-1 px-3 py-2 text-sm border rounded-lg border-input bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring transition"
-                  />
-                  <button onClick={() => removeWeeklyTask(i)} className="p-2 text-muted-foreground hover:text-destructive transition">
-                    <X className="w-4 h-4" />
-                  </button>
-                </div>
-              ))}
-              <div className="flex items-center gap-2">
-                <input
-                  placeholder="Add a new weekly task…"
-                  value={newWeeklyTask}
-                  onChange={(e) => setNewWeeklyTask(e.target.value)}
-                  onKeyDown={(e) => e.key === "Enter" && addWeeklyTask()}
-                  className="flex-1 px-3 py-2 text-sm border rounded-lg border-input bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring transition"
-                />
-                <button onClick={addWeeklyTask} className="p-2 text-primary hover:text-primary/80 transition">
-                  <Plus className="w-5 h-5" />
-                </button>
-              </div>
-            </div>
-          </div>
+          <EditableList
+            label="Weekly Tasks"
+            items={proposalTemplate.weeklyTasks}
+            onUpdate={(items) => updateProposal({ weeklyTasks: items })}
+            onRemove={removeWeeklyTask}
+            newValue={newWeeklyTask}
+            onNewChange={setNewWeeklyTask}
+            onAdd={addWeeklyTask}
+            placeholder="Add a new weekly task…"
+          />
 
-          {/* Monthly Tasks */}
-          <div>
-            <label className="block text-sm font-medium text-foreground mb-2">Monthly Tasks</label>
-            <div className="space-y-2">
-              {proposalTemplate.monthlyTasks.map((task, i) => (
-                <div key={i} className="flex items-start gap-2">
-                  <input
-                    value={task}
-                    onChange={(e) => {
-                      const updated = [...proposalTemplate.monthlyTasks];
-                      updated[i] = e.target.value;
-                      updateProposal({ monthlyTasks: updated });
-                    }}
-                    className="flex-1 px-3 py-2 text-sm border rounded-lg border-input bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring transition"
-                  />
-                  <button onClick={() => removeMonthlyTask(i)} className="p-2 text-muted-foreground hover:text-destructive transition">
-                    <X className="w-4 h-4" />
-                  </button>
-                </div>
-              ))}
-              <div className="flex items-center gap-2">
-                <input
-                  placeholder="Add a new monthly task…"
-                  value={newMonthlyTask}
-                  onChange={(e) => setNewMonthlyTask(e.target.value)}
-                  onKeyDown={(e) => e.key === "Enter" && addMonthlyTask()}
-                  className="flex-1 px-3 py-2 text-sm border rounded-lg border-input bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring transition"
-                />
-                <button onClick={addMonthlyTask} className="p-2 text-primary hover:text-primary/80 transition">
-                  <Plus className="w-5 h-5" />
-                </button>
-              </div>
-            </div>
-          </div>
+          <EditableList
+            label="Monthly Tasks"
+            items={proposalTemplate.monthlyTasks}
+            onUpdate={(items) => updateProposal({ monthlyTasks: items })}
+            onRemove={removeMonthlyTask}
+            newValue={newMonthlyTask}
+            onNewChange={setNewMonthlyTask}
+            onAdd={addMonthlyTask}
+            placeholder="Add a new monthly task…"
+          />
 
           <AreaField label="Footer Text" value={proposalTemplate.footerText} onChange={(v) => updateProposal({ footerText: v })} />
         </section>
@@ -147,8 +134,88 @@ const Templates = () => {
             Service Agreement
           </div>
 
-          <Field label="Document Title" value={agreementTemplate.title} onChange={(v) => updateAgreement({ title: v })} />
-          <AreaField label="Term & Termination Text" value={agreementTemplate.termText} onChange={(v) => updateAgreement({ termText: v })} />
+          <EditableList
+            label="I. Contractor Responsibilities"
+            items={agreementTemplate.contractorResponsibilities}
+            onUpdate={(items) => updateAgreement({ contractorResponsibilities: items })}
+            onRemove={removeContractorResp}
+            newValue={newContractorResp}
+            onNewChange={setNewContractorResp}
+            onAdd={addContractorResp}
+            placeholder="Add contractor responsibility…"
+          />
+
+          <EditableList
+            label="II. Customer Responsibilities"
+            items={agreementTemplate.customerResponsibilities}
+            onUpdate={(items) => updateAgreement({ customerResponsibilities: items })}
+            onRemove={removeCustomerResp}
+            newValue={newCustomerResp}
+            onNewChange={setNewCustomerResp}
+            onAdd={addCustomerResp}
+            placeholder="Add customer responsibility…"
+          />
+
+          <AreaField label="III. Insurance Coverage Text" value={agreementTemplate.insuranceText} onChange={(v) => updateAgreement({ insuranceText: v })} />
+          <AreaField label="IV. Period of Agreement Text" value={agreementTemplate.periodText} onChange={(v) => updateAgreement({ periodText: v })} />
+          <AreaField label="V. Changes in Specifications Text" value={agreementTemplate.changesText} onChange={(v) => updateAgreement({ changesText: v })} />
+
+          {/* Extra Services */}
+          <div>
+            <label className="block text-sm font-medium text-foreground mb-2">VI. Extra Services (separate from contract)</label>
+            <div className="space-y-2">
+              {agreementTemplate.extraServices.map((svc, i) => (
+                <div key={i} className="flex items-start gap-2">
+                  <input
+                    value={svc.label}
+                    onChange={(e) => {
+                      const updated = [...agreementTemplate.extraServices];
+                      updated[i] = { ...updated[i], label: e.target.value };
+                      updateAgreement({ extraServices: updated });
+                    }}
+                    className="flex-1 px-3 py-2 text-sm border rounded-lg border-input bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring transition"
+                    placeholder="Service name"
+                  />
+                  <input
+                    value={svc.price}
+                    onChange={(e) => {
+                      const updated = [...agreementTemplate.extraServices];
+                      updated[i] = { ...updated[i], price: e.target.value };
+                      updateAgreement({ extraServices: updated });
+                    }}
+                    className="w-32 px-3 py-2 text-sm border rounded-lg border-input bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring transition"
+                    placeholder="Price"
+                  />
+                  <button onClick={() => removeExtraService(i)} className="p-2 text-muted-foreground hover:text-destructive transition">
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+              ))}
+              <div className="flex items-center gap-2">
+                <input
+                  placeholder="Service name…"
+                  value={newExtraLabel}
+                  onChange={(e) => setNewExtraLabel(e.target.value)}
+                  className="flex-1 px-3 py-2 text-sm border rounded-lg border-input bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring transition"
+                />
+                <input
+                  placeholder="Price…"
+                  value={newExtraPrice}
+                  onChange={(e) => setNewExtraPrice(e.target.value)}
+                  className="w-32 px-3 py-2 text-sm border rounded-lg border-input bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring transition"
+                />
+                <button onClick={addExtraService} className="p-2 text-primary hover:text-primary/80 transition">
+                  <Plus className="w-5 h-5" />
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <AreaField label="Invoice Note" value={agreementTemplate.invoiceNote} onChange={(v) => updateAgreement({ invoiceNote: v })} />
+          <AreaField label="Third-Party Processing Note" value={agreementTemplate.thirdPartyNote} onChange={(v) => updateAgreement({ thirdPartyNote: v })} />
+          <AreaField label="VII. Signatures Note" value={agreementTemplate.signaturesNote} onChange={(v) => updateAgreement({ signaturesNote: v })} />
+          <Field label="Prices Valid Days Text" value={agreementTemplate.pricesValidDays} onChange={(v) => updateAgreement({ pricesValidDays: v })} />
+          <Field label="Copyright Text" value={agreementTemplate.copyrightText} onChange={(v) => updateAgreement({ copyrightText: v })} />
           <AreaField label="Footer Disclaimer" value={agreementTemplate.footerDisclaimer} onChange={(v) => updateAgreement({ footerDisclaimer: v })} />
         </section>
 
@@ -159,6 +226,47 @@ const Templates = () => {
     </div>
   );
 };
+
+function EditableList({ label, items, onUpdate, onRemove, newValue, onNewChange, onAdd, placeholder }: {
+  label: string; items: string[]; onUpdate: (items: string[]) => void; onRemove: (i: number) => void;
+  newValue: string; onNewChange: (v: string) => void; onAdd: () => void; placeholder: string;
+}) {
+  return (
+    <div>
+      <label className="block text-sm font-medium text-foreground mb-2">{label}</label>
+      <div className="space-y-2">
+        {items.map((item, i) => (
+          <div key={i} className="flex items-start gap-2">
+            <input
+              value={item}
+              onChange={(e) => {
+                const updated = [...items];
+                updated[i] = e.target.value;
+                onUpdate(updated);
+              }}
+              className="flex-1 px-3 py-2 text-sm border rounded-lg border-input bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring transition"
+            />
+            <button onClick={() => onRemove(i)} className="p-2 text-muted-foreground hover:text-destructive transition">
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        ))}
+        <div className="flex items-center gap-2">
+          <input
+            placeholder={placeholder}
+            value={newValue}
+            onChange={(e) => onNewChange(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && onAdd()}
+            className="flex-1 px-3 py-2 text-sm border rounded-lg border-input bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring transition"
+          />
+          <button onClick={onAdd} className="p-2 text-primary hover:text-primary/80 transition">
+            <Plus className="w-5 h-5" />
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 function Field({ label, value, onChange }: { label: string; value: string; onChange: (v: string) => void }) {
   return (
