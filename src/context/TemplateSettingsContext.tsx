@@ -96,7 +96,7 @@ const defaultAgreementTemplate: AgreementTemplate = {
   footerDisclaimer: "Each Office Pride location is independently owned and operated.",
 };
 
-const defaultSettings: TemplateSettings = {
+export const defaultTemplateSettings: TemplateSettings = {
   companyName: "CleanPro Services",
   companyAddress: "123 Main Street, City",
   companyPhone: "+1 234 567 890",
@@ -121,9 +121,9 @@ const STORAGE_KEY = "cleaning-template-settings";
 function loadSettings(): TemplateSettings {
   try {
     const stored = localStorage.getItem(STORAGE_KEY);
-    if (stored) return { ...defaultSettings, ...JSON.parse(stored) };
+    if (stored) return { ...defaultTemplateSettings, ...JSON.parse(stored) };
   } catch {}
-  return defaultSettings;
+  return defaultTemplateSettings;
 }
 
 export function TemplateSettingsProvider({ children }: { children: ReactNode }) {

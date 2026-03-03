@@ -4,6 +4,7 @@ interface ServiceAgreementData {
   // Provider info
   providerName: string;
   providerDBA: string;
+  logoUrl?: string;
   // Client info
   clientName: string;
   clientAddress: string;
@@ -33,7 +34,17 @@ interface ServiceAgreementData {
   footerDisclaimer: string;
 }
 
-export function generateServiceAgreementPDF(data: ServiceAgreementData) {
+function loadImage(url: string): Promise<HTMLImageElement> {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.crossOrigin = "anonymous";
+    img.onload = () => resolve(img);
+    img.onerror = reject;
+    img.src = url;
+  });
+}
+
+export async function generateServiceAgreementPDF(data: ServiceAgreementData) {
   const doc = new jsPDF({ unit: "pt", format: "a4" });
   const pageWidth = doc.internal.pageSize.getWidth();
   const pageHeight = doc.internal.pageSize.getHeight();
@@ -99,7 +110,22 @@ export function generateServiceAgreementPDF(data: ServiceAgreementData) {
     doc.setTextColor(50);
   };
 
-  // ============ HEADER ============
+  // ============ LOGO + HEADER ============
+  if (data.logoUrl) {
+    try {
+      const img = await loadImage(data.logoUrl);
+      const maxLogoH = 50;
+      const maxLogoW = 180;
+      const ratio = Math.min(maxLogoW / img.width, maxLogoH / img.height);
+      const logoW = img.width * ratio;
+      const logoH = img.height * ratio;
+      doc.addImage(img, "PNG", (pageWidth - logoW) / 2, y, logoW, logoH);
+      y += logoH + 10;
+    } catch {
+      // If logo fails to load, skip it
+    }
+  }
+
   doc.setFont("helvetica", "bold");
   doc.setFontSize(16);
   doc.setTextColor(30);
@@ -237,6 +263,7 @@ export function buildServiceAgreementHtml(data: ServiceAgreementData): string {
 
   return `
     <div style="font-family:Arial,sans-serif;max-width:650px;margin:0 auto;padding:24px;">
+      ${data.logoUrl ? `<div style="text-align:center;margin-bottom:12px;"><img src="${data.logoUrl}" style="max-height:60px;max-width:200px;" /></div>` : ""}
       <h1 style="text-align:center;color:#1a1a1a;font-size:20px;">${data.providerDBA || data.providerName}</h1>
       <p style="text-align:center;color:#666;font-size:12px;">Service Agreement</p>
       <hr style="border:none;border-top:1px solid #e5e5e5;margin:16px 0;" />

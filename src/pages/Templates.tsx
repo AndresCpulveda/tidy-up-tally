@@ -1,5 +1,5 @@
-import { useTemplateSettings } from "@/context/TemplateSettingsContext";
-import { ArrowLeft, FileText, FileDown, Plus, X, Eye } from "lucide-react";
+import { useTemplateSettings, defaultTemplateSettings } from "@/context/TemplateSettingsContext";
+import { ArrowLeft, FileText, FileDown, Plus, X, Eye, RotateCcw } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useState, useMemo } from "react";
 import { buildServiceAgreementHtml } from "@/utils/generateServiceAgreementPDF";
@@ -91,6 +91,7 @@ const Templates = () => {
     return buildServiceAgreementHtml({
       providerName: settings.companyName,
       providerDBA: proposalTemplate.contractorName,
+      logoUrl: settings.logoUrl,
       clientName: "Sample Customer",
       clientAddress: "123 Sample St",
       date: new Date().toLocaleDateString(),
@@ -128,17 +129,33 @@ const Templates = () => {
                   Customize the text content of your generated PDF documents.
                 </p>
               </div>
-              <button
-                onClick={() => setShowPreview(!showPreview)}
-                className={`flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-xl border-2 transition-all ${
-                  showPreview
-                    ? "border-primary bg-primary text-primary-foreground"
-                    : "border-border bg-card text-muted-foreground hover:text-foreground hover:border-primary/40"
-                }`}
-              >
-                <Eye className="w-4 h-4" />
-                Preview
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => {
+                    if (window.confirm("Reset all templates to default values? This cannot be undone.")) {
+                      updateSettings({
+                        proposalTemplate: defaultTemplateSettings.proposalTemplate,
+                        agreementTemplate: defaultTemplateSettings.agreementTemplate,
+                      });
+                    }
+                  }}
+                  className="flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-xl border-2 border-border bg-card text-muted-foreground hover:text-destructive hover:border-destructive/40 transition-all"
+                >
+                  <RotateCcw className="w-4 h-4" />
+                  Reset
+                </button>
+                <button
+                  onClick={() => setShowPreview(!showPreview)}
+                  className={`flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-xl border-2 transition-all ${
+                    showPreview
+                      ? "border-primary bg-primary text-primary-foreground"
+                      : "border-border bg-card text-muted-foreground hover:text-foreground hover:border-primary/40"
+                  }`}
+                >
+                  <Eye className="w-4 h-4" />
+                  Preview
+                </button>
+              </div>
             </div>
           </div>
 
