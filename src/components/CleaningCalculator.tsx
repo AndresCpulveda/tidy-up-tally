@@ -124,8 +124,8 @@ const CleaningCalculator = () => {
         </h1>
         <p className="mt-3 text-muted-foreground">
           {step === 1
-            ? "Start by entering your client's information."
-            : "Now configure the estimate details and payment terms."}
+            ? "Configure the estimate details and see your quote."
+            : "Enter client details to generate PDFs."}
         </p>
         {/* Step indicator */}
         <div className="flex items-center justify-center gap-2 mt-4">
@@ -137,43 +137,6 @@ const CleaningCalculator = () => {
 
       <div className="w-full max-w-lg space-y-6">
         {step === 1 && (
-          <>
-            <div className="grid gap-4">
-              <TextField id="clientName" label="Client / Company Name" icon={<Building2 className="w-4 h-4" />} placeholder="Acme Corp" value={clientName} onChange={setClientName} />
-              <TextField id="clientAddress" label="Address" icon={<Globe className="w-4 h-4" />} placeholder="123 Main St, City" value={clientAddress} onChange={setClientAddress} />
-              <div className="grid grid-cols-2 gap-3">
-                <TextField id="clientPhone" label="Phone" icon={<Phone className="w-4 h-4" />} placeholder="+1 234 567 890" value={clientPhone} onChange={setClientPhone} />
-                <TextField id="clientEmail" label="Email" icon={<MailIcon className="w-4 h-4" />} placeholder="client@example.com" value={clientEmail} onChange={setClientEmail} />
-              </div>
-            </div>
-            <div className="flex gap-3">
-              <button
-                onClick={() => setStep(2)}
-                disabled={!clientFilled}
-                className="flex-1 flex items-center justify-center gap-2 px-4 py-3 font-semibold rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 transition-all disabled:opacity-50 disabled:pointer-events-none"
-              >
-                Continue
-                <ArrowRight className="w-5 h-5" />
-              </button>
-              <Link
-                to="/settings"
-                className="flex items-center justify-center gap-2 px-4 py-3 font-semibold transition-all border-2 rounded-xl border-border bg-card text-muted-foreground hover:text-foreground hover:border-primary/40"
-              >
-                <Settings className="w-5 h-5" />
-                Settings
-              </Link>
-              <Link
-                to="/templates"
-                className="flex items-center justify-center gap-2 px-4 py-3 font-semibold transition-all border-2 rounded-xl border-border bg-card text-muted-foreground hover:text-foreground hover:border-primary/40"
-              >
-                <Palette className="w-5 h-5" />
-                Templates
-              </Link>
-            </div>
-          </>
-        )}
-
-        {step === 2 && (
           <>
             {/* Inputs */}
             <div className="grid gap-4">
@@ -202,13 +165,58 @@ const CleaningCalculator = () => {
             {/* Actions */}
             <div className="flex flex-wrap gap-3">
               <button
+                onClick={() => setStep(2)}
+                disabled={!hasInput}
+                className="flex-1 flex items-center justify-center gap-2 px-4 py-3 font-semibold rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 transition-all disabled:opacity-50 disabled:pointer-events-none"
+              >
+                Continue
+                <ArrowRight className="w-5 h-5" />
+              </button>
+              <Link
+                to="/settings"
+                className="flex items-center justify-center gap-2 px-4 py-3 font-semibold transition-all border-2 rounded-xl border-border bg-card text-muted-foreground hover:text-foreground hover:border-primary/40"
+              >
+                <Settings className="w-5 h-5" />
+                Settings
+              </Link>
+              <Link
+                to="/templates"
+                className="flex items-center justify-center gap-2 px-4 py-3 font-semibold transition-all border-2 rounded-xl border-border bg-card text-muted-foreground hover:text-foreground hover:border-primary/40"
+              >
+                <Palette className="w-5 h-5" />
+                Templates
+              </Link>
+            </div>
+          </>
+        )}
+
+        {step === 2 && (
+          <>
+            {/* Summary */}
+            <div className="p-4 rounded-xl bg-accent text-accent-foreground text-sm space-y-1">
+              <div className="flex justify-between"><span>Staff × Hours × Frequency</span><span className="font-semibold">{people} × {hours} × {times}</span></div>
+              <div className="flex justify-between"><span>Monthly Estimate</span><span className="font-bold text-lg">€{totalBill.toFixed(2)}</span></div>
+            </div>
+
+            <div className="grid gap-4">
+              <TextField id="clientName" label="Client / Company Name" icon={<Building2 className="w-4 h-4" />} placeholder="Acme Corp" value={clientName} onChange={setClientName} />
+              <TextField id="clientAddress" label="Address" icon={<Globe className="w-4 h-4" />} placeholder="123 Main St, City" value={clientAddress} onChange={setClientAddress} />
+              <div className="grid grid-cols-2 gap-3">
+                <TextField id="clientPhone" label="Phone" icon={<Phone className="w-4 h-4" />} placeholder="+1 234 567 890" value={clientPhone} onChange={setClientPhone} />
+                <TextField id="clientEmail" label="Email" icon={<MailIcon className="w-4 h-4" />} placeholder="client@example.com" value={clientEmail} onChange={setClientEmail} />
+              </div>
+            </div>
+
+            {/* Actions */}
+            <div className="flex flex-wrap gap-3">
+              <button
                 onClick={() => setStep(1)}
                 className="flex items-center justify-center gap-2 px-4 py-3 font-semibold transition-all border-2 rounded-xl border-border bg-card text-muted-foreground hover:text-foreground hover:border-primary/40"
               >
                 <ArrowLeft className="w-5 h-5" />
                 Back
               </button>
-              {hasInput && (
+              {clientFilled && (
                 <>
                   <button
                     onClick={generatePDF}
