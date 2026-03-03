@@ -155,7 +155,7 @@ const CleaningCalculator = () => {
               <div className="border-t border-primary-foreground/20" />
               <div className="flex items-center justify-between">
                 <div className="text-sm font-medium opacity-85">Monthly Estimate</div>
-                <div className="text-3xl font-bold tracking-tight">€{totalBill.toFixed(2)}</div>
+                <div className="text-3xl font-bold tracking-tight">${totalBill.toFixed(2)}</div>
               </div>
               {!hasInput && (
                 <div className="text-sm text-center opacity-75">Enter details above to see your quote</div>
@@ -195,7 +195,7 @@ const CleaningCalculator = () => {
             {/* Summary */}
             <div className="p-4 rounded-xl bg-accent text-accent-foreground text-sm space-y-1">
               <div className="flex justify-between"><span>Staff × Hours × Frequency</span><span className="font-semibold">{people} × {hours} × {times}</span></div>
-              <div className="flex justify-between"><span>Monthly Estimate</span><span className="font-bold text-lg">€{totalBill.toFixed(2)}</span></div>
+              <div className="flex justify-between"><span>Monthly Estimate</span><span className="font-bold text-lg">${totalBill.toFixed(2)}</span></div>
             </div>
 
             <div className="grid gap-4">

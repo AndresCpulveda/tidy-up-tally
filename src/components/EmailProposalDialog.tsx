@@ -59,12 +59,12 @@ export default function EmailProposalDialog({
         <tr><td style="padding:8px 0;color:#666;">Number of People</td><td style="padding:8px 0;font-weight:600;">${numPeople}</td></tr>
         <tr><td style="padding:8px 0;color:#666;">Hours per Person</td><td style="padding:8px 0;">${hoursPerPerson}</td></tr>
         <tr><td style="padding:8px 0;color:#666;">Times per Week</td><td style="padding:8px 0;">${timesPerWeek}</td></tr>
-        <tr><td style="padding:8px 0;color:#666;">Hourly Rate</td><td style="padding:8px 0;">€${hourlyRate.toFixed(2)}</td></tr>
+        <tr><td style="padding:8px 0;color:#666;">Hourly Rate</td><td style="padding:8px 0;">$${hourlyRate.toFixed(2)}</td></tr>
         <tr><td style="padding:8px 0;color:#666;">Total Hours/Week</td><td style="padding:8px 0;font-weight:600;">${totalHoursPerWeek.toFixed(1)}</td></tr>
         <tr><td style="padding:8px 0;color:#666;">Monthly Hours (Est.)</td><td style="padding:8px 0;">${monthlyHours.toFixed(1)}</td></tr>
       </table>
       <div style="background:#22785a;color:#fff;padding:16px;border-radius:8px;text-align:center;font-size:20px;font-weight:700;">
-        Monthly Estimate: €${totalBill.toFixed(2)}
+        Monthly Estimate: $${totalBill.toFixed(2)}
       </div>
       ${billingDate ? `<p style="margin-top:12px;color:#666;font-size:13px;">Terms: ${billingDate}</p>` : ""}
       <p style="margin-top:24px;color:#999;font-size:12px;">This is an estimate. Final pricing may vary based on on-site assessment.</p>
@@ -100,7 +100,7 @@ export default function EmailProposalDialog({
       const { data, error } = await supabase.functions.invoke("send-proposal-email", {
         body: {
           recipientEmail: email,
-          subject: `Cleaning ${subjectParts.join(" & ")} — €${totalBill.toFixed(2)}/month`,
+          subject: `Cleaning ${subjectParts.join(" & ")} — $${totalBill.toFixed(2)}/month`,
           proposalHtml: combinedHtml,
         },
       });
