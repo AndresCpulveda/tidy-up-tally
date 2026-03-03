@@ -182,7 +182,7 @@ export async function generateServiceAgreementPDF(data: ServiceAgreementData) {
   // ============ VI. Cost of Service and Invoicing ============
   addSectionHeader("VI", "Cost of Service and Invoicing");
 
-  const costText = `a. Customer agrees to pay contractor the sum of €${data.totalBill.toFixed(2)} per month for service(s) ${data.timesPerWeek} time(s) per week, ${data.numPeople} staff member(s), ${data.hoursPerPerson} hour(s) each.`;
+  const costText = `a. Customer agrees to pay contractor the sum of $${data.totalBill.toFixed(2)} per month for service(s) ${data.timesPerWeek} time(s) per week, ${data.numPeople} staff member(s), ${data.hoursPerPerson} hour(s) each.`;
   addWrappedText(costText, margin, contentWidth);
   y += 4;
 
@@ -292,7 +292,7 @@ export function buildServiceAgreementHtml(data: ServiceAgreementData): string {
 
       <h3 style="color:#1a1a1a;">VI. Cost of Service</h3>
       <div style="background:#22785a;color:#fff;padding:12px;border-radius:8px;text-align:center;font-size:18px;font-weight:700;">
-        Monthly Fee: €${data.totalBill.toFixed(2)}
+        Monthly Fee: $${data.totalBill.toFixed(2)}
       </div>
 
       <h3 style="color:#1a1a1a;">VII. Signatures</h3>
