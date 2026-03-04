@@ -2,6 +2,7 @@ import { useTemplateSettings, defaultTemplateSettings } from "@/context/Template
 import { ArrowLeft, FileText, FileDown, Plus, X, Eye, RotateCcw } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useState, useMemo } from "react";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { buildServiceAgreementHtml } from "@/utils/generateServiceAgreementPDF";
 
 const Templates = () => {
@@ -159,61 +160,64 @@ const Templates = () => {
             </div>
           </div>
 
-          {/* Proposal Template */}
-          <section className="space-y-4 p-6 rounded-xl border border-border bg-card">
-            <div className="flex items-center gap-2 text-foreground font-semibold text-lg">
-              <FileDown className="w-5 h-5 text-primary" />
-              Cleaning Proposal
-            </div>
-            <Field label="Document Title" value={proposalTemplate.title} onChange={(v) => updateProposal({ title: v })} />
-            <Field label="Contractor Name" value={proposalTemplate.contractorName} onChange={(v) => updateProposal({ contractorName: v })} />
-            <EditableList label="Weekly Tasks" items={proposalTemplate.weeklyTasks} onUpdate={(items) => updateProposal({ weeklyTasks: items })} onRemove={removeWeeklyTask} newValue={newWeeklyTask} onNewChange={setNewWeeklyTask} onAdd={addWeeklyTask} placeholder="Add a new weekly task…" />
-            <EditableList label="Monthly Tasks" items={proposalTemplate.monthlyTasks} onUpdate={(items) => updateProposal({ monthlyTasks: items })} onRemove={removeMonthlyTask} newValue={newMonthlyTask} onNewChange={setNewMonthlyTask} onAdd={addMonthlyTask} placeholder="Add a new monthly task…" />
-            <AreaField label="Footer Text" value={proposalTemplate.footerText} onChange={(v) => updateProposal({ footerText: v })} />
-          </section>
+          <Tabs defaultValue="proposal" className="w-full">
+            <TabsList className="w-full">
+              <TabsTrigger value="proposal" className="flex-1 gap-1.5">
+                <FileDown className="w-4 h-4" />
+                Cleaning Proposal
+              </TabsTrigger>
+              <TabsTrigger value="agreement" className="flex-1 gap-1.5">
+                <FileText className="w-4 h-4" />
+                Service Agreement
+              </TabsTrigger>
+            </TabsList>
 
-          {/* Agreement Template */}
-          <section className="space-y-4 p-6 rounded-xl border border-border bg-card">
-            <div className="flex items-center gap-2 text-foreground font-semibold text-lg">
-              <FileText className="w-5 h-5 text-primary" />
-              Service Agreement
-            </div>
-            <EditableList label="I. Contractor Responsibilities" items={agreementTemplate.contractorResponsibilities} onUpdate={(items) => updateAgreement({ contractorResponsibilities: items })} onRemove={removeContractorResp} newValue={newContractorResp} onNewChange={setNewContractorResp} onAdd={addContractorResp} placeholder="Add contractor responsibility…" />
-            <EditableList label="II. Customer Responsibilities" items={agreementTemplate.customerResponsibilities} onUpdate={(items) => updateAgreement({ customerResponsibilities: items })} onRemove={removeCustomerResp} newValue={newCustomerResp} onNewChange={setNewCustomerResp} onAdd={addCustomerResp} placeholder="Add customer responsibility…" />
-            <AreaField label="III. Insurance Coverage Text" value={agreementTemplate.insuranceText} onChange={(v) => updateAgreement({ insuranceText: v })} />
-            <AreaField label="IV. Period of Agreement Text" value={agreementTemplate.periodText} onChange={(v) => updateAgreement({ periodText: v })} />
-            <AreaField label="V. Changes in Specifications Text" value={agreementTemplate.changesText} onChange={(v) => updateAgreement({ changesText: v })} />
+            <TabsContent value="proposal">
+              <section className="space-y-4 p-6 rounded-xl border border-border bg-card">
+                <Field label="Document Title" value={proposalTemplate.title} onChange={(v) => updateProposal({ title: v })} />
+                <Field label="Contractor Name" value={proposalTemplate.contractorName} onChange={(v) => updateProposal({ contractorName: v })} />
+                <EditableList label="Weekly Tasks" items={proposalTemplate.weeklyTasks} onUpdate={(items) => updateProposal({ weeklyTasks: items })} onRemove={removeWeeklyTask} newValue={newWeeklyTask} onNewChange={setNewWeeklyTask} onAdd={addWeeklyTask} placeholder="Add a new weekly task…" />
+                <EditableList label="Monthly Tasks" items={proposalTemplate.monthlyTasks} onUpdate={(items) => updateProposal({ monthlyTasks: items })} onRemove={removeMonthlyTask} newValue={newMonthlyTask} onNewChange={setNewMonthlyTask} onAdd={addMonthlyTask} placeholder="Add a new monthly task…" />
+                <AreaField label="Footer Text" value={proposalTemplate.footerText} onChange={(v) => updateProposal({ footerText: v })} />
+              </section>
+            </TabsContent>
 
-            {/* Extra Services */}
-            <div>
-              <label className="block text-sm font-medium text-foreground mb-2">VI. Extra Services (separate from contract)</label>
-              <div className="space-y-2">
-                {agreementTemplate.extraServices.map((svc, i) => (
-                  <div key={i} className="flex items-start gap-2">
-                    <input value={svc.label} onChange={(e) => { const updated = [...agreementTemplate.extraServices]; updated[i] = { ...updated[i], label: e.target.value }; updateAgreement({ extraServices: updated }); }} className="flex-1 px-3 py-2 text-sm border rounded-lg border-input bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring transition" placeholder="Service name" />
-                    <input value={svc.price} onChange={(e) => { const updated = [...agreementTemplate.extraServices]; updated[i] = { ...updated[i], price: e.target.value }; updateAgreement({ extraServices: updated }); }} className="w-32 px-3 py-2 text-sm border rounded-lg border-input bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring transition" placeholder="Price" />
-                    <button onClick={() => removeExtraService(i)} className="p-2 text-muted-foreground hover:text-destructive transition"><X className="w-4 h-4" /></button>
+            <TabsContent value="agreement">
+              <section className="space-y-4 p-6 rounded-xl border border-border bg-card">
+                <EditableList label="I. Contractor Responsibilities" items={agreementTemplate.contractorResponsibilities} onUpdate={(items) => updateAgreement({ contractorResponsibilities: items })} onRemove={removeContractorResp} newValue={newContractorResp} onNewChange={setNewContractorResp} onAdd={addContractorResp} placeholder="Add contractor responsibility…" />
+                <EditableList label="II. Customer Responsibilities" items={agreementTemplate.customerResponsibilities} onUpdate={(items) => updateAgreement({ customerResponsibilities: items })} onRemove={removeCustomerResp} newValue={newCustomerResp} onNewChange={setNewCustomerResp} onAdd={addCustomerResp} placeholder="Add customer responsibility…" />
+                <AreaField label="III. Insurance Coverage Text" value={agreementTemplate.insuranceText} onChange={(v) => updateAgreement({ insuranceText: v })} />
+                <AreaField label="IV. Period of Agreement Text" value={agreementTemplate.periodText} onChange={(v) => updateAgreement({ periodText: v })} />
+                <AreaField label="V. Changes in Specifications Text" value={agreementTemplate.changesText} onChange={(v) => updateAgreement({ changesText: v })} />
+
+                {/* Extra Services */}
+                <div>
+                  <label className="block text-sm font-medium text-foreground mb-2">VI. Extra Services (separate from contract)</label>
+                  <div className="space-y-2">
+                    {agreementTemplate.extraServices.map((svc, i) => (
+                      <div key={i} className="flex items-start gap-2">
+                        <input value={svc.label} onChange={(e) => { const updated = [...agreementTemplate.extraServices]; updated[i] = { ...updated[i], label: e.target.value }; updateAgreement({ extraServices: updated }); }} className="flex-1 px-3 py-2 text-sm border rounded-lg border-input bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring transition" placeholder="Service name" />
+                        <input value={svc.price} onChange={(e) => { const updated = [...agreementTemplate.extraServices]; updated[i] = { ...updated[i], price: e.target.value }; updateAgreement({ extraServices: updated }); }} className="w-32 px-3 py-2 text-sm border rounded-lg border-input bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring transition" placeholder="Price" />
+                        <button onClick={() => removeExtraService(i)} className="p-2 text-muted-foreground hover:text-destructive transition"><X className="w-4 h-4" /></button>
+                      </div>
+                    ))}
+                    <div className="flex items-center gap-2">
+                      <input placeholder="Service name…" value={newExtraLabel} onChange={(e) => setNewExtraLabel(e.target.value)} className="flex-1 px-3 py-2 text-sm border rounded-lg border-input bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring transition" />
+                      <input placeholder="Price…" value={newExtraPrice} onChange={(e) => setNewExtraPrice(e.target.value)} className="w-32 px-3 py-2 text-sm border rounded-lg border-input bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring transition" />
+                      <button onClick={addExtraService} className="p-2 text-primary hover:text-primary/80 transition"><Plus className="w-5 h-5" /></button>
+                    </div>
                   </div>
-                ))}
-                <div className="flex items-center gap-2">
-                  <input placeholder="Service name…" value={newExtraLabel} onChange={(e) => setNewExtraLabel(e.target.value)} className="flex-1 px-3 py-2 text-sm border rounded-lg border-input bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring transition" />
-                  <input placeholder="Price…" value={newExtraPrice} onChange={(e) => setNewExtraPrice(e.target.value)} className="w-32 px-3 py-2 text-sm border rounded-lg border-input bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring transition" />
-                  <button onClick={addExtraService} className="p-2 text-primary hover:text-primary/80 transition"><Plus className="w-5 h-5" /></button>
                 </div>
-              </div>
-            </div>
 
-            <AreaField label="Invoice Note" value={agreementTemplate.invoiceNote} onChange={(v) => updateAgreement({ invoiceNote: v })} />
-            <AreaField label="Third-Party Processing Note" value={agreementTemplate.thirdPartyNote} onChange={(v) => updateAgreement({ thirdPartyNote: v })} />
-            <AreaField label="VII. Signatures Note" value={agreementTemplate.signaturesNote} onChange={(v) => updateAgreement({ signaturesNote: v })} />
-            <Field label="Prices Valid Days Text" value={agreementTemplate.pricesValidDays} onChange={(v) => updateAgreement({ pricesValidDays: v })} />
-            <Field label="Copyright Text" value={agreementTemplate.copyrightText} onChange={(v) => updateAgreement({ copyrightText: v })} />
-            <AreaField label="Footer Disclaimer" value={agreementTemplate.footerDisclaimer} onChange={(v) => updateAgreement({ footerDisclaimer: v })} />
-          </section>
-
-          <p className="text-xs text-muted-foreground text-center pt-4">
-            Changes are saved automatically in your browser.
-          </p>
+                <AreaField label="Invoice Note" value={agreementTemplate.invoiceNote} onChange={(v) => updateAgreement({ invoiceNote: v })} />
+                <AreaField label="Third-Party Processing Note" value={agreementTemplate.thirdPartyNote} onChange={(v) => updateAgreement({ thirdPartyNote: v })} />
+                <AreaField label="VII. Signatures Note" value={agreementTemplate.signaturesNote} onChange={(v) => updateAgreement({ signaturesNote: v })} />
+                <Field label="Prices Valid Days Text" value={agreementTemplate.pricesValidDays} onChange={(v) => updateAgreement({ pricesValidDays: v })} />
+                <Field label="Copyright Text" value={agreementTemplate.copyrightText} onChange={(v) => updateAgreement({ copyrightText: v })} />
+                <AreaField label="Footer Disclaimer" value={agreementTemplate.footerDisclaimer} onChange={(v) => updateAgreement({ footerDisclaimer: v })} />
+              </section>
+            </TabsContent>
+          </Tabs>
         </div>
 
         {/* Preview Panel */}
