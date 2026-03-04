@@ -57,11 +57,7 @@ export default function EmailProposalDialog({
       <h2 style="font-size:18px;color:#1a1a1a;">Cleaning Service Proposal</h2>
       <table style="width:100%;border-collapse:collapse;margin:16px 0;">
         <tr><td style="padding:8px 0;color:#666;">Number of People</td><td style="padding:8px 0;font-weight:600;">${numPeople}</td></tr>
-        <tr><td style="padding:8px 0;color:#666;">Hours per Person</td><td style="padding:8px 0;">${hoursPerPerson}</td></tr>
         <tr><td style="padding:8px 0;color:#666;">Times per Week</td><td style="padding:8px 0;">${timesPerWeek}</td></tr>
-        <tr><td style="padding:8px 0;color:#666;">Hourly Rate</td><td style="padding:8px 0;">$${hourlyRate.toFixed(2)}</td></tr>
-        <tr><td style="padding:8px 0;color:#666;">Total Hours/Week</td><td style="padding:8px 0;font-weight:600;">${totalHoursPerWeek.toFixed(1)}</td></tr>
-        <tr><td style="padding:8px 0;color:#666;">Monthly Hours (Est.)</td><td style="padding:8px 0;">${monthlyHours.toFixed(1)}</td></tr>
       </table>
       <div style="background:#22785a;color:#fff;padding:16px;border-radius:8px;text-align:center;font-size:20px;font-weight:700;">
         Monthly Estimate: $${totalBill.toFixed(2)}
