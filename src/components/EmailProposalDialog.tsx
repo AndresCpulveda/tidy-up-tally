@@ -3,15 +3,17 @@ import { Mail, Send, Loader2 } from "lucide-react";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import jsPDF from "jspdf";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useTemplateSettings } from "@/context/TemplateSettingsContext";
-import { buildServiceAgreementHtml } from "@/utils/generateServiceAgreementPDF";
+import { generateServiceAgreementPDF } from "@/utils/generateServiceAgreementPDF";
 
 interface EmailProposalDialogProps {
   totalHoursPerWeek: number;
@@ -51,46 +53,100 @@ export default function EmailProposalDialog({
   const [includeAgreement, setIncludeAgreement] = useState(true);
   const { toast } = useToast();
   const { settings } = useTemplateSettings();
-  const buildProposalHtml = () => `
-    <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:24px;">
-      <h1 style="color:#1a1a1a;font-size:22px;">${companyName || "Cleaning Service Proposal"}</h1>
-      <p style="color:#666;font-size:13px;">${[companyAddress, companyPhone, companyEmail].filter(Boolean).join(" · ")}</p>
-      <hr style="border:none;border-top:1px solid #e5e5e5;margin:16px 0;" />
-      <h2 style="font-size:18px;color:#1a1a1a;">Cleaning Service Proposal</h2>
-      <table style="width:100%;border-collapse:collapse;margin:16px 0;">
-        <tr><td style="padding:8px 0;color:#666;">Number of People</td><td style="padding:8px 0;font-weight:600;">${numPeople}</td></tr>
-        <tr><td style="padding:8px 0;color:#666;">Times per Week</td><td style="padding:8px 0;">${timesPerWeek}</td></tr>
-      </table>
-      <div style="background:#22785a;color:#fff;padding:16px;border-radius:8px;text-align:center;font-size:20px;font-weight:700;">
-        Monthly Estimate: $${totalBill.toFixed(2)}
-      </div>
-      ${billingDate ? `<p style="margin-top:12px;color:#666;font-size:13px;">Terms: ${billingDate}</p>` : ""}
-      <p style="margin-top:24px;color:#999;font-size:12px;">This is an estimate. Final pricing may vary based on on-site assessment.</p>
-    </div>
-  `;
 
-  const agreementData = {
-    providerName: settings.companyName,
-    providerDBA: settings.proposalTemplate.contractorName,
-    clientName: companyName,
-    clientAddress: companyAddress,
-    date: new Date().toLocaleDateString(),
-    numPeople, hoursPerPerson, timesPerWeek, hourlyRate,
-    totalHoursPerWeek, monthlyHours, totalBill,
-    billingDate,
-    billingStartDate,
-    ...settings.agreementTemplate,
+  const generateProposalPdfBase64 (): string => {
+    const doc = new jsPDF({ unit: "pt", format: "a4" });
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = doc.internal.pageSize.getHeight();
+    const margin = 60;
+    let y = margin;
+    const lineHeight = 18;
+    const sectionSpacing = 25;
+
+    const addPageIfNeeded = (requiredSpace = 20) => {
+      if (y + requiredSpace > pageHeight - margin) { doc.addPage(); y = margin; }
+    };
+    const addText = (text: string, options: { x?: number; align?: "center" | "left" | "right" | "justify" } = {}) => {
+      addPageIfNeeded(lineHeight);
+      doc.text(text, options.x || margin, y, options.align ? { align: options.align } : {});
+      y += lineHeight;
+    };
+
+    const date = new Date().toLocaleDateString();
+
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(18);
+    addText(settings.proposalTemplate.title, { align: "center", x: pageWidth / 2 });
+    y += sectionSpacing;
+
+    doc.setFontSize(12);
+    doc.setFont("helvetica", "normal");
+    addText(`Customer: ${companyName}`);
+    addText(`Location: ${companyAddress}`);
+    addText(`Contractor: ${settings.proposalTemplate.contractorName}`);
+    addText(`Date: ${date}`);
+    y += sectionSpacing;
+
+    doc.setFont("helvetica", "bold");
+    addText(`Times Per Week (${timesPerWeek || ""})`);
+    y += 10;
+    doc.setFont("helvetica", "normal");
+
+    settings.proposalTemplate.weeklyTasks.forEach(task => {
+      const splitText: string[] = doc.splitTextToSize("• " + task, pageWidth - margin * 2);
+      splitText.forEach(line => { addPageIfNeeded(lineHeight); doc.text(line, margin, y); y += lineHeight; });
+    });
+    y += sectionSpacing;
+
+    doc.setFont("helvetica", "bold");
+    addText("Monthly");
+    y += 10;
+    doc.setFont("helvetica", "normal");
+    settings.proposalTemplate.monthlyTasks.forEach(task => {
+      const splitText: string[] = doc.splitTextToSize("• " + task, pageWidth - margin * 2);
+      splitText.forEach(line => { addPageIfNeeded(lineHeight); doc.text(line, margin, y); y += lineHeight; });
+    });
+
+    const totalPages = doc.getNumberOfPages();
+    for (let i = 1; i <= totalPages; i++) {
+      doc.setPage(i);
+      doc.setFontSize(9);
+      doc.setTextColor(120);
+      doc.text(settings.proposalTemplate.footerText, pageWidth / 2, pageHeight - 30, { align: "center" });
+      doc.text(`Page ${i}`, pageWidth - margin, pageHeight - 30, { align: "right" });
+    }
+
+    return doc.output("datauristring").split(",")[1];
   };
 
   const handleSend = async () => {
     if (!email || (!includeProposal && !includeAgreement)) return;
     setSending(true);
     try {
-      const sections: string[] = [];
-      if (includeProposal) sections.push(buildProposalHtml());
-      if (includeAgreement) sections.push(buildServiceAgreementHtml(agreementData));
+      const attachments: { filename: string; content: string }[] = [];
+      const date = new Date().toLocaleDateString();
 
-      const combinedHtml = sections.join('<hr style="border:none;border-top:2px solid #e5e5e5;margin:40px 0;" />');
+      if (includeProposal) {
+        const proposalBase64 = generateProposalPdfBase64();
+        attachments.push({ filename: `cleaning-proposal-${date}.pdf`, content: proposalBase64 });
+      }
+
+      if (includeAgreement) {
+        const agreementBase64 = await generateServiceAgreementPDF({
+          providerName: settings.companyName,
+          providerDBA: settings.proposalTemplate.contractorName,
+          logoUrl: settings.logoUrl,
+          clientName: companyName,
+          clientAddress: companyAddress,
+          date,
+          numPeople, hoursPerPerson, timesPerWeek, hourlyRate,
+          totalHoursPerWeek, monthlyHours, totalBill,
+          billingDate,
+          billingStartDate,
+          ...settings.agreementTemplate,
+        }, true);
+        attachments.push({ filename: `service-agreement-${date}.pdf`, content: agreementBase64 });
+      }
 
       const subjectParts: string[] = [];
       if (includeProposal) subjectParts.push("Proposal");
@@ -100,14 +156,15 @@ export default function EmailProposalDialog({
         body: {
           recipientEmail: email,
           subject: `Cleaning ${subjectParts.join(" & ")} — $${totalBill.toFixed(2)}/month`,
-          proposalHtml: combinedHtml,
+          bodyText: `Hi,\n\nPlease find attached the ${subjectParts.join(" and ").toLowerCase()} for your review.\n\nMonthly estimate: $${totalBill.toFixed(2)}\n\nBest regards,\n${settings.companyName}`,
+          attachments,
         },
       });
 
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
 
-      toast({ title: "Email sent!", description: `${subjectParts.join(" & ")} sent to ${email}` });
+      toast({ title: "Email sent!", description: `${subjectParts.join(" & ")} sent as PDF attachment(s) to ${email}` });
       setOpen(false);
       setEmail("");
     } catch (err: any) {
@@ -132,6 +189,7 @@ export default function EmailProposalDialog({
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Send by Email</DialogTitle>
+          <DialogDescription>Send PDF documents as email attachments.</DialogDescription>
         </DialogHeader>
         <div className="space-y-4 pt-2">
           <div>
@@ -148,7 +206,7 @@ export default function EmailProposalDialog({
             />
           </div>
           <div className="space-y-2">
-            <p className="text-sm font-medium text-foreground">Include in email:</p>
+            <p className="text-sm font-medium text-foreground">Attach PDFs:</p>
             <label className="flex items-center gap-2 text-sm text-foreground cursor-pointer">
               <input
                 type="checkbox"
@@ -174,7 +232,7 @@ export default function EmailProposalDialog({
             className="w-full"
           >
             {sending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
-            {sending ? "Sending…" : "Send Email"}
+            {sending ? "Generating & Sending…" : "Send Email with PDFs"}
           </Button>
         </div>
       </DialogContent>
