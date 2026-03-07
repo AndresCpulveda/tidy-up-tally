@@ -54,7 +54,7 @@ export default function EmailProposalDialog({
   const { toast } = useToast();
   const { settings } = useTemplateSettings();
 
-  const generateProposalPdfBase64 (): string => {
+  const generateProposalPdfBase64 = (): string => {
     const doc = new jsPDF({ unit: "pt", format: "a4" });
     const pageWidth = doc.internal.pageSize.getWidth();
     const pageHeight = doc.internal.pageSize.getHeight();
