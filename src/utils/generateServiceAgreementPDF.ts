@@ -19,6 +19,7 @@ interface ServiceAgreementData {
   monthlyHours: number;
   totalBill: number;
   billingDate: string;
+  billingStartDate: string;
   // Template content
   contractorResponsibilities: string[];
   customerResponsibilities: string[];
@@ -172,7 +173,7 @@ export async function generateServiceAgreementPDF(data: ServiceAgreementData) {
 
   // ============ IV. Period of Agreement ============
   addSectionHeader("IV", "Period of Agreement");
-  const periodFull = `Service will commence the ${data.date} and continue. ${data.periodText}`;
+  const periodFull = `Service will commence on ${data.billingStartDate}. ${data.periodText}`;
   addWrappedText(periodFull, margin, contentWidth);
 
   // ============ V. Changes in Specifications ============
@@ -285,7 +286,7 @@ export function buildServiceAgreementHtml(data: ServiceAgreementData): string {
       <p style="font-size:13px;color:#333;">${data.insuranceText}</p>
 
       <h3 style="color:#1a1a1a;">IV. Period of Agreement</h3>
-      <p style="font-size:13px;color:#333;">${data.periodText}</p>
+      <p style="font-size:13px;color:#333;">Service will commence on ${data.billingStartDate}. ${data.periodText}</p>
 
       <h3 style="color:#1a1a1a;">V. Changes in Specifications</h3>
       <p style="font-size:13px;color:#333;">${data.changesText}</p>

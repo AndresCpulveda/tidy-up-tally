@@ -18,6 +18,7 @@ const CleaningCalculator = () => {
   const [clientAddress, setClientAddress] = useState("");
   const [clientPhone, setClientPhone] = useState("");
   const [clientEmail, setClientEmail] = useState("");
+  const [billingStartDate, setBillingStartDate] = useState("");
 
   // Step 2 — Estimate details
   const [numPeople, setNumPeople] = useState<string>("");
@@ -205,6 +206,7 @@ const CleaningCalculator = () => {
                 <TextField id="clientPhone" label="Phone" icon={<Phone className="w-4 h-4" />} placeholder="+1 234 567 890" value={clientPhone} onChange={setClientPhone} />
                 <TextField id="clientEmail" label="Email" icon={<MailIcon className="w-4 h-4" />} placeholder="client@example.com" value={clientEmail} onChange={setClientEmail} />
               </div>
+              <TextField id="billingStartDate" label="Billing Start Date" icon={<CalendarDays className="w-4 h-4" />} placeholder="e.g. January 1, 2026" value={billingStartDate} onChange={setBillingStartDate} />
             </div>
 
             {/* Actions */}
@@ -241,6 +243,7 @@ const CleaningCalculator = () => {
                       monthlyHours,
                       totalBill,
                       billingDate: billingTerms,
+                      billingStartDate: billingStartDate || new Date().toLocaleDateString(),
                       ...settings.agreementTemplate,
                     })}
                     className="flex items-center justify-center flex-1 gap-2 px-4 py-3 font-semibold transition-all border-2 rounded-xl border-primary bg-card text-primary hover:bg-accent"
@@ -260,6 +263,7 @@ const CleaningCalculator = () => {
                     companyPhone={clientPhone}
                     companyEmail={clientEmail}
                     billingDate={billingTerms}
+                    billingStartDate={billingStartDate || new Date().toLocaleDateString()}
                     monthlyHours={monthlyHours}
                   />
                 </>
