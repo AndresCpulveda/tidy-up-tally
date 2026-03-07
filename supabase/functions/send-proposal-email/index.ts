@@ -10,7 +10,7 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const { recipientEmail, recipientName, proposalHtml, subject } = await req.json();
+    const { recipientEmail, subject, bodyText, attachments } = await req.json();
 
     if (!recipientEmail) {
       return new Response(
@@ -27,18 +27,29 @@ Deno.serve(async (req) => {
       );
     }
 
+    // Build Resend payload
+    const emailPayload: Record<string, unknown> = {
+      from: "Cleaning Proposal <onboarding@resend.dev>",
+      to: [recipientEmail],
+      subject: subject || "Your Cleaning Service Documents",
+      text: bodyText || "Please find the attached documents.",
+    };
+
+    // Add attachments if provided (array of { filename, content (base64) })
+    if (attachments && Array.isArray(attachments) && attachments.length > 0) {
+      emailPayload.attachments = attachments.map((att: { filename: string; content: string }) => ({
+        filename: att.filename,
+        content: att.content,
+      }));
+    }
+
     const res = await fetch("https://api.resend.com/emails", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${RESEND_API_KEY}`,
       },
-      body: JSON.stringify({
-        from: "Cleaning Proposal <onboarding@resend.dev>",
-        to: [recipientEmail],
-        subject: subject || "Your Cleaning Service Proposal",
-        html: proposalHtml,
-      }),
+      body: JSON.stringify(emailPayload),
     });
 
     const data = await res.json();

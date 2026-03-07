@@ -45,7 +45,7 @@ function loadImage(url: string): Promise<HTMLImageElement> {
   });
 }
 
-export async function generateServiceAgreementPDF(data: ServiceAgreementData) {
+export async function generateServiceAgreementPDF(data: ServiceAgreementData, returnBase64 = false): Promise<string> {
   const doc = new jsPDF({ unit: "pt", format: "a4" });
   const pageWidth = doc.internal.pageSize.getWidth();
   const pageHeight = doc.internal.pageSize.getHeight();
@@ -255,7 +255,11 @@ export async function generateServiceAgreementPDF(data: ServiceAgreementData) {
     doc.text(data.footerDisclaimer, pageWidth / 2, pageHeight - 20, { align: "center" });
   }
 
+  if (returnBase64) {
+    return doc.output("datauristring").split(",")[1];
+  }
   doc.save(`service-agreement-${data.date}.pdf`);
+  return "";
 }
 
 export function buildServiceAgreementHtml(data: ServiceAgreementData): string {
