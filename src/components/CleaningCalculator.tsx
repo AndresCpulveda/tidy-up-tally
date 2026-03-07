@@ -263,6 +263,7 @@ const CleaningCalculator = () => {
                     companyPhone={clientPhone}
                     companyEmail={clientEmail}
                     billingDate={billingTerms}
+                    billingStartDate={billingStartDate || new Date().toLocaleDateString()}
                     monthlyHours={monthlyHours}
                   />
                 </>
