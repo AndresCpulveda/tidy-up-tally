@@ -104,6 +104,7 @@ const Templates = () => {
       monthlyHours: 52,
       totalBill: 52 * settings.hourlyRate,
       billingDate: settings.billingDate,
+      billingStartDate: new Date().toLocaleDateString(),
       ...agreementTemplate,
     });
   }, [settings, proposalTemplate.contractorName, agreementTemplate]);

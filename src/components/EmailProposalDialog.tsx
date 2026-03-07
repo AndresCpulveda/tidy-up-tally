@@ -25,6 +25,7 @@ interface EmailProposalDialogProps {
   companyPhone: string;
   companyEmail: string;
   billingDate: string;
+  billingStartDate: string;
   monthlyHours: number;
 }
 
@@ -40,6 +41,7 @@ export default function EmailProposalDialog({
   companyPhone,
   companyEmail,
   billingDate,
+  billingStartDate,
   monthlyHours,
 }: EmailProposalDialogProps) {
   const [open, setOpen] = useState(false);
@@ -76,6 +78,7 @@ export default function EmailProposalDialog({
     numPeople, hoursPerPerson, timesPerWeek, hourlyRate,
     totalHoursPerWeek, monthlyHours, totalBill,
     billingDate,
+    billingStartDate,
     ...settings.agreementTemplate,
   };
 
