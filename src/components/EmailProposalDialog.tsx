@@ -156,7 +156,22 @@ export default function EmailProposalDialog({
         body: {
           recipientEmail: email,
           subject: `Cleaning ${subjectParts.join(" & ")} — $${totalBill.toFixed(2)}/month`,
-          bodyText: `Hi,\n\nPlease find attached the ${subjectParts.join(" and ").toLowerCase()} for your review.\n\nMonthly estimate: $${totalBill.toFixed(2)}\n\nBest regards,\n${settings.companyName}`,
+          bodyText: `Hi,\n\n
+          I'd like to thank you for allowing me to visit your treatment center to provide you with an estimate for janitorial services.  Per our discussion, we would be cleaning your apartments once a month for a total of 20 apartments.  Attached, you will find a detailed estimate that outlines the scope of work, the services included, and the associated costs. Our proposal is designed to ensure your facilities are maintained to the highest standards of cleanliness and hygiene. Here are some of the key benefits you can expect from our services:\n\n
+          We bring our own cleaning supplies and equipment, which are commercial grade.  We do not ask clients to buy our supplies or equipment.  We make sure our clients get properly serviced in a professional manner\n\n
+          Besides cleaning, our cleaning products, also, sanitize and disinfect.  When a product disinfects, it kills germs, bacteria, and viruses, which is important nowadays.  We do not use household cleaning products that could make your floors sticky, and not disinfected.  Moreover, our products will not damage your flooring\n\n
+          Color coding for cleaning rags.  Red for toilets, yellow for the rest of the bathroom, green for other surfaces in the office, and blue for glass and mirror.  We do not cross-contaminate.  In other words, there is no chance we use the same rags in the bathroom and the kitchen\n\n
+          A consistent and professional system to clean.  We come to the site with a designed plan to clean your office (please see cleaning specs in the attachment).  We are not a mom-and pop shop.  Office Pride has been in service for over 30 years\n\n
+          An assigned supervisor to make sure we provide the service we have agreed.  Many companies promise what we promise, but few make sure of the execution.  Our supervisors are trained to execute on our promises\n\n
+          We are insured and bonded\n\n
+          We offer a 2% discount on your total monthly invoice if you pay electronically and within 10 days after invoice was sent out.
+          ${subjectParts.join(" and ").toLowerCase()} for your review.\n\n
+          The quote is for $${totalBill.toFixed(2)} We know we provide the best value in the market and we will be honored to prove that to you.  Our team is equipped with the expertise, equipment, and dedication to deliver these benefits consistently. We take pride in our attention to detail and our commitment to meeting your specific cleaning needs.
+
+          If you have any questions or need further clarification on the estimate, please do not hesitate to reach out. I am available to discuss any aspect of the proposal at your convenience.
+
+          Thank you for considering Office Pride Commercial Cleaning Services as your trusted partner in maintaining a clean and healthy work environment. We look forward to the opportunity to work with you. Have a wonderful day!\n\n
+          Best regards,\n${settings.companyName}`,
           attachments,
         },
       });
