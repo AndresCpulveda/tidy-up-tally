@@ -38,7 +38,17 @@ const CleaningCalculator = () => {
 
   const clientFilled = clientName.trim().length > 0;
 
-  const generatePDF = () => {
+  const loadImage = (url: string): Promise<HTMLImageElement> => {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.crossOrigin = "anonymous";
+      img.onload = () => resolve(img);
+      img.onerror = reject;
+      img.src = url;
+    });
+  };
+
+  const generatePDF = async () => {
     const doc = new jsPDF({ unit: "pt", format: "a4" });
     const pageWidth = doc.internal.pageSize.getWidth();
     const pageHeight = doc.internal.pageSize.getHeight();
@@ -57,6 +67,20 @@ const CleaningCalculator = () => {
     };
 
     const date = new Date().toLocaleDateString();
+
+    // Add logo
+    try {
+      const logoImg = await loadImage(officePrideLogo);
+      const maxLogoH = 50;
+      const maxLogoW = 180;
+      const ratio = Math.min(maxLogoW / logoImg.width, maxLogoH / logoImg.height);
+      const logoW = logoImg.width * ratio;
+      const logoH = logoImg.height * ratio;
+      doc.addImage(logoImg, "PNG", (pageWidth - logoW) / 2, y, logoW, logoH);
+      y += logoH + 10;
+    } catch {
+      // Skip logo if it fails to load
+    }
 
     doc.setFont("helvetica", "bold");
     doc.setFontSize(18);
