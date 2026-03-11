@@ -52,7 +52,7 @@ const CleaningCalculator = () => {
     const doc = new jsPDF({ unit: "pt", format: "a4" });
     const pageWidth = doc.internal.pageSize.getWidth();
     const pageHeight = doc.internal.pageSize.getHeight();
-    const margin = 60;
+    const margin = 50;
     let y = margin;
     const lineHeight = 18;
     const sectionSpacing = 25;
@@ -76,7 +76,7 @@ const CleaningCalculator = () => {
       const ratio = Math.min(maxLogoW / logoImg.width, maxLogoH / logoImg.height);
       const logoW = logoImg.width * ratio;
       const logoH = logoImg.height * ratio;
-      doc.addImage(logoImg, "PNG", (pageWidth - logoW) / 2, y, logoW, logoH);
+      doc.addImage(logoImg, "PNG", margin, margin - 20, logoW, logoH);
       y += logoH + 10;
     } catch {
       // Skip logo if it fails to load
@@ -116,15 +116,6 @@ const CleaningCalculator = () => {
       splitText.forEach(line => { addPageIfNeeded(lineHeight); doc.text(line, margin, y); y += lineHeight; });
     });
     y += sectionSpacing;
-
-    doc.setFont("helvetica", "bold");
-    addText("Monthly");
-    y += 10;
-    doc.setFont("helvetica", "normal");
-    ["Dust baseboards (wash as needed).", "Spot clean doors and walls.", "Dust overhead vents and blinds."].forEach(task => {
-      const splitText = doc.splitTextToSize("• " + task, pageWidth - margin * 2);
-      splitText.forEach(line => { addPageIfNeeded(lineHeight); doc.text(line, margin, y); y += lineHeight; });
-    });
 
     const totalPages = doc.getNumberOfPages();
     for (let i = 1; i <= totalPages; i++) {
