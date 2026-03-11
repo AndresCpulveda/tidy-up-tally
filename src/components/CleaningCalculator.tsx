@@ -253,7 +253,7 @@ const CleaningCalculator = () => {
                     onClick={() => generateServiceAgreementPDF({
                       providerName: settings.companyName,
                       providerDBA: settings.proposalTemplate.contractorName,
-                      logoUrl: settings.logoUrl,
+                      logoUrl: officePrideLogo,
                       clientName,
                       clientAddress,
                       date: new Date().toLocaleDateString(),
