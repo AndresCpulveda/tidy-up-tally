@@ -136,7 +136,7 @@ export default function EmailProposalDialog({
         const agreementBase64 = await generateServiceAgreementPDF({
           providerName: settings.companyName,
           providerDBA: settings.proposalTemplate.contractorName,
-          logoUrl: settings.logoUrl,
+          logoUrl: officePrideLogo,
           clientName: companyName,
           clientAddress: companyAddress,
           date,
