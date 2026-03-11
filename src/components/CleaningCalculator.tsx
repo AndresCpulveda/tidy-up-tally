@@ -1,8 +1,9 @@
 import { useState } from "react";
 import {
-  Sparkles, FileDown, FileText, Settings, Users, Clock, CalendarDays,
+  FileDown, FileText, Settings, Users, Clock, CalendarDays,
   ArrowRight, ArrowLeft, Building2, Phone, Mail as MailIcon, Globe, Palette,
 } from "lucide-react";
+import officePrideLogo from "@/assets/office-pride-logo.png";
 import { Link } from "react-router-dom";
 import jsPDF from "jspdf";
 import { useTemplateSettings } from "@/context/TemplateSettingsContext";
