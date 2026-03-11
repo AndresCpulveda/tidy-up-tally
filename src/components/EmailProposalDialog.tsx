@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import officePrideLogo from "@/assets/office-pride-logo.png";
-import { Mail, Send, Loader2 } from "lucide-react";
+import { Mail, Send, Loader2, Eye } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -10,6 +10,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import jsPDF from "jspdf";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -52,6 +53,9 @@ export default function EmailProposalDialog({
   const [sending, setSending] = useState(false);
   const [includeProposal, setIncludeProposal] = useState(true);
   const [includeAgreement, setIncludeAgreement] = useState(true);
+  const [previewUrls, setPreviewUrls] = useState<{ proposal?: string; agreement?: string }>({});
+  const [previewing, setPreviewing] = useState(false);
+  const [showPreview, setShowPreview] = useState(false);
   const { toast } = useToast();
   const { settings } = useTemplateSettings();
 
@@ -120,6 +124,63 @@ export default function EmailProposalDialog({
     return doc.output("datauristring").split(",")[1];
   };
 
+  const generateProposalBlobUrl = (): string => {
+    const base64 = generateProposalPdfBase64();
+    const binary = atob(base64);
+    const bytes = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+    const blob = new Blob([bytes], { type: "application/pdf" });
+    return URL.createObjectURL(blob);
+  };
+
+  const getAgreementData = () => {
+    const date = new Date().toLocaleDateString();
+    return {
+      providerName: settings.companyName,
+      providerDBA: settings.proposalTemplate.contractorName,
+      logoUrl: officePrideLogo,
+      clientName: companyName,
+      clientAddress: companyAddress,
+      date,
+      numPeople, hoursPerPerson, timesPerWeek, hourlyRate,
+      totalHoursPerWeek, monthlyHours, totalBill,
+      billingDate,
+      billingStartDate,
+      ...settings.agreementTemplate,
+    };
+  };
+
+  const handlePreview = useCallback(async () => {
+    setPreviewing(true);
+    try {
+      // Revoke old URLs
+      if (previewUrls.proposal) URL.revokeObjectURL(previewUrls.proposal);
+      if (previewUrls.agreement) URL.revokeObjectURL(previewUrls.agreement);
+
+      const urls: { proposal?: string; agreement?: string } = {};
+
+      if (includeProposal) {
+        urls.proposal = generateProposalBlobUrl();
+      }
+
+      if (includeAgreement) {
+        const base64 = await generateServiceAgreementPDF(getAgreementData(), true);
+        const binary = atob(base64);
+        const bytes = new Uint8Array(binary.length);
+        for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+        const blob = new Blob([bytes], { type: "application/pdf" });
+        urls.agreement = URL.createObjectURL(blob);
+      }
+
+      setPreviewUrls(urls);
+      setShowPreview(true);
+    } catch (err: any) {
+      toast({ title: "Preview failed", description: err.message, variant: "destructive" });
+    } finally {
+      setPreviewing(false);
+    }
+  }, [includeProposal, includeAgreement, settings, companyName, companyAddress, timesPerWeek]);
+
   const handleSend = async () => {
     if (!email || (!includeProposal && !includeAgreement)) return;
     setSending(true);
@@ -133,19 +194,7 @@ export default function EmailProposalDialog({
       }
 
       if (includeAgreement) {
-        const agreementBase64 = await generateServiceAgreementPDF({
-          providerName: settings.companyName,
-          providerDBA: settings.proposalTemplate.contractorName,
-          logoUrl: officePrideLogo,
-          clientName: companyName,
-          clientAddress: companyAddress,
-          date,
-          numPeople, hoursPerPerson, timesPerWeek, hourlyRate,
-          totalHoursPerWeek, monthlyHours, totalBill,
-          billingDate,
-          billingStartDate,
-          ...settings.agreementTemplate,
-        }, true);
+        const agreementBase64 = await generateServiceAgreementPDF(getAgreementData(), true);
         attachments.push({ filename: `service-agreement-${date}.pdf`, content: agreementBase64 });
       }
 
@@ -183,6 +232,7 @@ export default function EmailProposalDialog({
       toast({ title: "Email sent!", description: `${subjectParts.join(" & ")} sent as PDF attachment(s) to ${email}` });
       setOpen(false);
       setEmail("");
+      setShowPreview(false);
     } catch (err: any) {
       toast({
         title: "Failed to send",
@@ -195,14 +245,14 @@ export default function EmailProposalDialog({
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (!o) { setShowPreview(false); } }}>
       <DialogTrigger asChild>
         <button className="flex-1 flex items-center justify-center gap-2 rounded-xl border-2 border-primary bg-card px-4 py-3 font-semibold text-primary hover:bg-accent transition-all">
           <Mail className="w-5 h-5" />
           Email
         </button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className={showPreview ? "sm:max-w-3xl max-h-[90vh] overflow-y-auto" : "sm:max-w-md"}>
         <DialogHeader>
           <DialogTitle>Send by Email</DialogTitle>
           <DialogDescription>Send PDF documents as email attachments.</DialogDescription>
@@ -227,7 +277,7 @@ export default function EmailProposalDialog({
               <input
                 type="checkbox"
                 checked={includeProposal}
-                onChange={(e) => setIncludeProposal(e.target.checked)}
+                onChange={(e) => { setIncludeProposal(e.target.checked); setShowPreview(false); }}
                 className="rounded border-input"
               />
               Cleaning Proposal
@@ -236,20 +286,58 @@ export default function EmailProposalDialog({
               <input
                 type="checkbox"
                 checked={includeAgreement}
-                onChange={(e) => setIncludeAgreement(e.target.checked)}
+                onChange={(e) => { setIncludeAgreement(e.target.checked); setShowPreview(false); }}
                 className="rounded border-input"
               />
               Service Agreement
             </label>
           </div>
-          <Button
-            onClick={handleSend}
-            disabled={!email || sending || (!includeProposal && !includeAgreement)}
-            className="w-full"
-          >
-            {sending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
-            {sending ? "Generating & Sending…" : "Send Email with PDFs"}
-          </Button>
+
+          {/* Preview Section */}
+          {showPreview && (previewUrls.proposal || previewUrls.agreement) && (
+            <div className="border border-border rounded-lg overflow-hidden">
+              {previewUrls.proposal && previewUrls.agreement ? (
+                <Tabs defaultValue="proposal" className="w-full">
+                  <TabsList className="w-full grid grid-cols-2">
+                    <TabsTrigger value="proposal">Cleaning Proposal</TabsTrigger>
+                    <TabsTrigger value="agreement">Service Agreement</TabsTrigger>
+                  </TabsList>
+                  <TabsContent value="proposal" className="mt-0">
+                    <iframe src={previewUrls.proposal} className="w-full h-[400px]" title="Proposal Preview" />
+                  </TabsContent>
+                  <TabsContent value="agreement" className="mt-0">
+                    <iframe src={previewUrls.agreement} className="w-full h-[400px]" title="Agreement Preview" />
+                  </TabsContent>
+                </Tabs>
+              ) : (
+                <iframe
+                  src={previewUrls.proposal || previewUrls.agreement}
+                  className="w-full h-[400px]"
+                  title="PDF Preview"
+                />
+              )}
+            </div>
+          )}
+
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              onClick={handlePreview}
+              disabled={previewing || (!includeProposal && !includeAgreement)}
+              className="flex-1"
+            >
+              {previewing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Eye className="w-4 h-4" />}
+              {previewing ? "Generating…" : "Preview PDFs"}
+            </Button>
+            <Button
+              onClick={handleSend}
+              disabled={!email || sending || (!includeProposal && !includeAgreement)}
+              className="flex-1"
+            >
+              {sending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+              {sending ? "Sending…" : "Send Email"}
+            </Button>
+          </div>
         </div>
       </DialogContent>
     </Dialog>
