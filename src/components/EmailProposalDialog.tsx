@@ -221,7 +221,7 @@ The quote is for $${totalBill.toFixed(2)} We know we provide the best value in t
 If you have any questions or need further clarification on the estimate, please do not hesitate to reach out. I am available to discuss any aspect of the proposal at your convenience.
 
 Thank you for considering Office Pride Commercial Cleaning Services as your trusted partner in maintaining a clean and healthy work environment. We look forward to the opportunity to work with you. Have a wonderful day!\n\n
-          Best regards,\n${settings.companyName}`,
+Best regards,\n${settings.companyName}`,
           attachments,
         },
       });

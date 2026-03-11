@@ -97,11 +97,11 @@ const defaultAgreementTemplate: AgreementTemplate = {
 };
 
 export const defaultTemplateSettings: TemplateSettings = {
-  companyName: "CleanPro Services",
-  companyAddress: "123 Main Street, City",
-  companyPhone: "+1 234 567 890",
-  companyEmail: "info@cleanpro.com",
-  logoUrl: "",
+  companyName: "Office Pride Commercial Cleaning Services",
+  companyAddress: "Fort Lauderdale - Hollywood",
+  companyPhone: "(954) 998-3518",
+  companyEmail: "CarlosEgusquiza@officepride.com",
+  logoUrl: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRW5IPUIyqinvCTRmkBi6zcv0ppV8nO-v-ZUA&s",
   billingDate: "Due upon receipt",
   hourlyRate: 25,
   proposalTemplate: defaultProposalTemplate,
