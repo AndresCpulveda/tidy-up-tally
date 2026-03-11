@@ -1,4 +1,5 @@
 import { useTemplateSettings, defaultTemplateSettings } from "@/context/TemplateSettingsContext";
+import officePrideLogo from "@/assets/office-pride-logo.png";
 import { ArrowLeft, FileText, FileDown, Plus, X, Eye, RotateCcw } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useState, useMemo } from "react";
