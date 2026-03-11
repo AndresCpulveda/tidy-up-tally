@@ -1,4 +1,5 @@
 import { useTemplateSettings, defaultTemplateSettings } from "@/context/TemplateSettingsContext";
+import officePrideLogo from "@/assets/office-pride-logo.png";
 import { ArrowLeft, FileText, FileDown, Plus, X, Eye, RotateCcw } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useState, useMemo } from "react";
@@ -92,7 +93,7 @@ const Templates = () => {
     return buildServiceAgreementHtml({
       providerName: settings.companyName,
       providerDBA: proposalTemplate.contractorName,
-      logoUrl: settings.logoUrl,
+      logoUrl: officePrideLogo,
       clientName: "Sample Customer",
       clientAddress: "123 Sample St",
       date: new Date().toLocaleDateString(),

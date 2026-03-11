@@ -1,8 +1,9 @@
 import { useState } from "react";
 import {
-  Sparkles, FileDown, FileText, Settings, Users, Clock, CalendarDays,
+  FileDown, FileText, Settings, Users, Clock, CalendarDays,
   ArrowRight, ArrowLeft, Building2, Phone, Mail as MailIcon, Globe, Palette,
 } from "lucide-react";
+import officePrideLogo from "@/assets/office-pride-logo.png";
 import { Link } from "react-router-dom";
 import jsPDF from "jspdf";
 import { useTemplateSettings } from "@/context/TemplateSettingsContext";
@@ -37,7 +38,17 @@ const CleaningCalculator = () => {
 
   const clientFilled = clientName.trim().length > 0;
 
-  const generatePDF = () => {
+  const loadImage = (url: string): Promise<HTMLImageElement> => {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.crossOrigin = "anonymous";
+      img.onload = () => resolve(img);
+      img.onerror = reject;
+      img.src = url;
+    });
+  };
+
+  const generatePDF = async () => {
     const doc = new jsPDF({ unit: "pt", format: "a4" });
     const pageWidth = doc.internal.pageSize.getWidth();
     const pageHeight = doc.internal.pageSize.getHeight();
@@ -56,6 +67,20 @@ const CleaningCalculator = () => {
     };
 
     const date = new Date().toLocaleDateString();
+
+    // Add logo
+    try {
+      const logoImg = await loadImage(officePrideLogo);
+      const maxLogoH = 50;
+      const maxLogoW = 180;
+      const ratio = Math.min(maxLogoW / logoImg.width, maxLogoH / logoImg.height);
+      const logoW = logoImg.width * ratio;
+      const logoH = logoImg.height * ratio;
+      doc.addImage(logoImg, "PNG", (pageWidth - logoW) / 2, y, logoW, logoH);
+      y += logoH + 10;
+    } catch {
+      // Skip logo if it fails to load
+    }
 
     doc.setFont("helvetica", "bold");
     doc.setFontSize(18);
@@ -116,10 +141,7 @@ const CleaningCalculator = () => {
     <div className="flex flex-col items-center justify-center min-h-screen px-4 py-12">
       {/* Header */}
       <div className="max-w-md mb-10 text-center">
-        <div className="inline-flex items-center gap-2 bg-accent text-accent-foreground px-4 py-1.5 rounded-full text-sm font-medium mb-4">
-          <Sparkles className="w-4 h-4" />
-          Instant Quote
-        </div>
+        <img src={officePrideLogo} alt="Office Pride Commercial Cleaning Services" className="h-16 mb-4" />
         <h1 className="text-3xl font-bold tracking-tight sm:text-4xl text-foreground">
           Cleaning Price Calculator
         </h1>
@@ -231,7 +253,7 @@ const CleaningCalculator = () => {
                     onClick={() => generateServiceAgreementPDF({
                       providerName: settings.companyName,
                       providerDBA: settings.proposalTemplate.contractorName,
-                      logoUrl: settings.logoUrl,
+                      logoUrl: officePrideLogo,
                       clientName,
                       clientAddress,
                       date: new Date().toLocaleDateString(),

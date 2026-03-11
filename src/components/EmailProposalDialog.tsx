@@ -1,4 +1,5 @@
 import { useState } from "react";
+import officePrideLogo from "@/assets/office-pride-logo.png";
 import { Mail, Send, Loader2 } from "lucide-react";
 import {
   Dialog,
@@ -135,7 +136,7 @@ export default function EmailProposalDialog({
         const agreementBase64 = await generateServiceAgreementPDF({
           providerName: settings.companyName,
           providerDBA: settings.proposalTemplate.contractorName,
-          logoUrl: settings.logoUrl,
+          logoUrl: officePrideLogo,
           clientName: companyName,
           clientAddress: companyAddress,
           date,
