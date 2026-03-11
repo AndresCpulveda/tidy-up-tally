@@ -117,10 +117,7 @@ const CleaningCalculator = () => {
     <div className="flex flex-col items-center justify-center min-h-screen px-4 py-12">
       {/* Header */}
       <div className="max-w-md mb-10 text-center">
-        <div className="inline-flex items-center gap-2 bg-accent text-accent-foreground px-4 py-1.5 rounded-full text-sm font-medium mb-4">
-          <Sparkles className="w-4 h-4" />
-          Instant Quote
-        </div>
+        <img src={officePrideLogo} alt="Office Pride Commercial Cleaning Services" className="h-16 mb-4" />
         <h1 className="text-3xl font-bold tracking-tight sm:text-4xl text-foreground">
           Cleaning Price Calculator
         </h1>
