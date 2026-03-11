@@ -93,7 +93,7 @@ const Templates = () => {
     return buildServiceAgreementHtml({
       providerName: settings.companyName,
       providerDBA: proposalTemplate.contractorName,
-      logoUrl: settings.logoUrl,
+      logoUrl: officePrideLogo,
       clientName: "Sample Customer",
       clientAddress: "123 Sample St",
       date: new Date().toLocaleDateString(),
