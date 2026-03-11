@@ -1,4 +1,5 @@
 import { useState } from "react";
+import officePrideLogo from "@/assets/office-pride-logo.png";
 import { Mail, Send, Loader2 } from "lucide-react";
 import {
   Dialog,
