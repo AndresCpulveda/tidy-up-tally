@@ -111,7 +111,15 @@ export async function generateServiceAgreementPDF(data: ServiceAgreementData, re
     doc.setTextColor(50);
   };
 
-  // ============ LOGO + HEADER ============
+  // ============ PAGINATION ============
+
+  doc.setFontSize(10);
+  doc.setTextColor(80);
+  doc.setFont("helvetica", "normal");
+  doc.text("Service Agreement", pageWidth - margin, y, { align: "right" });
+  y += sectionGap;
+
+  // ============ LOGO ============
   if (data.logoUrl) {
     try {
       const img = await loadImage(data.logoUrl);
@@ -120,24 +128,19 @@ export async function generateServiceAgreementPDF(data: ServiceAgreementData, re
       const ratio = Math.min(maxLogoW / img.width, maxLogoH / img.height);
       const logoW = img.width * ratio;
       const logoH = img.height * ratio;
-      doc.addImage(img, "PNG", (pageWidth - logoW) / 2, y, logoW, logoH);
+      doc.addImage(img, "PNG", margin, margin - 20, logoW, logoH);
       y += logoH + 10;
     } catch {
       // If logo fails to load, skip it
     }
   }
 
+  // ============ HEADER ============
   doc.setFont("helvetica", "bold");
   doc.setFontSize(16);
   doc.setTextColor(30);
   doc.text(data.providerDBA || data.providerName, pageWidth / 2, y, { align: "center" });
   y += lineHeight + 2;
-
-  doc.setFontSize(10);
-  doc.setTextColor(80);
-  doc.setFont("helvetica", "normal");
-  doc.text("Service Agreement – Page 1", pageWidth - margin, y, { align: "right" });
-  y += sectionGap;
 
   // Customer / Date / Location / Contractor
   doc.setFontSize(10);
