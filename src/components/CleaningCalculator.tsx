@@ -183,7 +183,7 @@ const CleaningCalculator = () => {
               <button
                 onClick={() => setStep(2)}
                 disabled={!hasInput}
-                className="flex-1 flex items-center justify-center gap-2 px-4 py-3 font-semibold rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 transition-all disabled:opacity-50 disabled:pointer-events-none"
+                className="flex-1 flex items-center justify-center gap-2 px-4 py-3 font-semibold rounded-xl bg-primary text-primary-foreground hover:bg-primary/100 border-primary border-2 hover:text-primary transition-all disabled:opacity-50 disabled:pointer-events-none"
               >
                 Continue
                 <ArrowRight className="w-5 h-5" />
