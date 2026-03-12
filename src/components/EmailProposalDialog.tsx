@@ -324,7 +324,7 @@ Best regards,\n${settings.companyName}`,
               variant="outline"
               onClick={handlePreview}
               disabled={previewing || (!includeProposal && !includeAgreement)}
-              className="flex-1"
+              className="flex-1 hidden sm:flex"
             >
               {previewing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Eye className="w-4 h-4" />}
               {previewing ? "Generating…" : "Preview PDFs"}
