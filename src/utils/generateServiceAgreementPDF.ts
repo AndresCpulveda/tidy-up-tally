@@ -60,6 +60,7 @@ export async function generateServiceAgreementPDF(data: ServiceAgreementData, re
     if (y + space > pageHeight - 60) {
       // addFooter();
       doc.addPage();
+      addPagination()
       y = margin;
     }
   };
@@ -113,12 +114,15 @@ export async function generateServiceAgreementPDF(data: ServiceAgreementData, re
   };
 
   // ============ PAGINATION ============
-  const page = doc.getNumberOfPages();
-  doc.setFontSize(16);
-  doc.setTextColor(10);
-  doc.setFont("helvetica", "normal");
-  doc.text(`Service Agreement – Page ${page}`, pageWidth - margin, y, { align: "right" });
-  y += sectionGap;
+  const addPagination = () => {
+    const page = doc.getNumberOfPages();
+    doc.setFontSize(16);
+    doc.setTextColor(10);
+    doc.setFont("helvetica", "normal");
+    doc.text(`Service Agreement – Page ${page}`, pageWidth - margin, y, { align: "right" });
+    y += sectionGap;
+  }
+  addPagination()
 
   // ============ LOGO ============
   if (data.logoUrl) {
