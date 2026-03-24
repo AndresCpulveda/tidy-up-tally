@@ -60,8 +60,8 @@ export async function generateServiceAgreementPDF(data: ServiceAgreementData, re
     if (y + space > pageHeight - 60) {
       // addFooter();
       doc.addPage();
-      addPagination()
       y = margin;
+      addPagination()
     }
   };
 
