@@ -210,8 +210,61 @@ export async function generateServiceAgreementPDF(data: ServiceAgreementData, re
   // ============ VI. Cost of Service and Invoicing ============
   addSectionHeader("VI", "Cost of Service and Invoicing");
 
-  const costText = `a. Customer agrees to pay contractor the sum of $${data.totalBill.toFixed(2)} per month for service(s) ${data.timesPerWeek} time(s) per week on the last day of the same month in which work is performed.`;
-  addWrappedText(costText, margin, contentWidth);
+  // Render cost text with bold amount and frequency
+  const costParts = [
+    { text: "a. Customer agrees to pay contractor the sum of ", bold: false },
+    { text: `$${data.totalBill.toFixed(2)} per month`, bold: true },
+    { text: " for service(s) ", bold: false },
+    { text: `${data.timesPerWeek} time(s) per week`, bold: true },
+    { text: " on the last day of the same month in which work is performed.", bold: false },
+  ];
+  
+  // Build a single string for line-wrapping calculation
+  const fullCostText = costParts.map(p => p.text).join("");
+  const costLines: string[] = doc.splitTextToSize(fullCostText, contentWidth);
+  
+  // Render each wrapped line with inline bold segments
+  let charIndex = 0;
+  costLines.forEach((line: string) => {
+    addPageIfNeeded(lineHeight);
+    let xPos = margin;
+    let lineRemaining = line;
+    
+    // Find which parts overlap with this line
+    let tempCharIndex = charIndex;
+    for (const part of costParts) {
+      if (lineRemaining.length === 0) break;
+      
+      // How much of this part is before the current line?
+      const partStart = fullCostText.indexOf(part.text, tempCharIndex > 0 ? 
+        costParts.slice(0, costParts.indexOf(part)).reduce((sum, p) => sum + p.text.length, 0) : 0);
+      const partEnd = partStart + part.text.length;
+      
+      if (partStart >= charIndex + line.length || partEnd <= charIndex) {
+        tempCharIndex = partEnd;
+        continue;
+      }
+      
+      // Calculate overlap
+      const overlapStart = Math.max(partStart, charIndex);
+      const overlapEnd = Math.min(partEnd, charIndex + line.length);
+      const segment = fullCostText.substring(overlapStart, overlapEnd);
+      
+      if (segment.length > 0) {
+        doc.setFont("helvetica", part.bold ? "bold" : "normal");
+        doc.text(segment, xPos, y);
+        xPos += doc.getTextWidth(segment);
+      }
+    }
+    
+    charIndex += line.length;
+    // Account for spaces removed by line wrapping
+    while (charIndex < fullCostText.length && fullCostText[charIndex] === ' ' && !costLines.some((l, i) => i > costLines.indexOf(line) && fullCostText.substring(charIndex).startsWith(l))) {
+      charIndex++;
+    }
+    y += lineHeight;
+  });
+  doc.setFont("helvetica", "normal");
   y += 4;
 
   if (data.billingDate) {
