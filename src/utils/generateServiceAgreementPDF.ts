@@ -28,7 +28,7 @@ interface ServiceAgreementData {
   periodText: string;
   changesText: string;
   extraServices: { label: string; price: string }[];
-  invoiceNote: string[];
+  invoiceNote: string;
   thirdPartyNote: string;
   signaturesNote: string;
   pricesValidDays: string;
@@ -210,8 +210,40 @@ export async function generateServiceAgreementPDF(data: ServiceAgreementData, re
   // ============ VI. Cost of Service and Invoicing ============
   addSectionHeader("VI", "Cost of Service and Invoicing");
 
-  const costText = `a. Customer agrees to pay contractor the sum of $${data.totalBill.toFixed(2)} per month for service(s) ${data.timesPerWeek} time(s) per week on the last day of the same month in which work is performed.`;
-  addWrappedText(costText, margin, contentWidth);
+  // Render cost text with bold amount and times per week using inline segments
+  const addInlineBoldText = (parts: { text: string; bold: boolean }[]) => {
+    // Render segments inline, wrapping when exceeding content width
+    let xPos = margin;
+    for (const part of parts) {
+      doc.setFont("helvetica", part.bold ? "bold" : "normal");
+      const words = part.text.split(" ");
+      words.forEach((word, wi) => {
+        const spacedWord = (xPos > margin || wi > 0) && wi < words.length ? " " + word : word;
+        const testWord = xPos === margin ? word : spacedWord;
+        const wordWidth = doc.getTextWidth(testWord);
+        if (xPos + wordWidth > pageWidth - margin && xPos > margin) {
+          y += lineHeight;
+          addPageIfNeeded(lineHeight);
+          xPos = margin;
+          doc.text(word, xPos, y);
+          xPos += doc.getTextWidth(word);
+        } else {
+          doc.text(testWord, xPos, y);
+          xPos += wordWidth;
+        }
+      });
+    }
+    y += lineHeight;
+    doc.setFont("helvetica", "normal");
+  };
+
+  addInlineBoldText([
+    { text: "a. Customer agrees to pay contractor the sum of", bold: false },
+    { text: `$${data.totalBill.toFixed(2)} per month`, bold: true },
+    { text: "for service(s)", bold: false },
+    { text: `${data.timesPerWeek} time(s) per week`, bold: true },
+    { text: "on the last day of the same month in which work is performed.", bold: false },
+  ]);
   y += 4;
 
   if (data.billingDate) {
