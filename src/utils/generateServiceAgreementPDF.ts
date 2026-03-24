@@ -24,6 +24,7 @@ interface ServiceAgreementData {
   contractorResponsibilities: string[];
   customerResponsibilities: string[];
   insuranceText: string;
+  insuranceBullets: string[];
   periodText: string;
   changesText: string;
   extraServices: { label: string; price: string }[];
@@ -57,24 +58,24 @@ export async function generateServiceAgreementPDF(data: ServiceAgreementData, re
 
   const addPageIfNeeded = (space = 30) => {
     if (y + space > pageHeight - 60) {
-      addFooter();
+      // addFooter();
       doc.addPage();
       y = margin;
     }
   };
 
-  const addFooter = () => {
-    const page = doc.getNumberOfPages();
-    doc.setFontSize(8);
-    doc.setTextColor(130);
-    doc.setFont("helvetica", "normal");
-    doc.text(
-      `${data.providerDBA || data.providerName} – Service Agreement – Page ${page}`,
-      pageWidth / 2,
-      pageHeight - 30,
-      { align: "center" }
-    );
-  };
+  // const addFooter = () => {
+  //   const page = doc.getNumberOfPages();
+  //   doc.setFontSize(8);
+  //   doc.setTextColor(130);
+  //   doc.setFont("helvetica", "normal");
+  //   doc.text(
+  //     `${data.providerDBA || data.providerName} – Service Agreement – Page ${page}`,
+  //     pageWidth / 2,
+  //     pageHeight - 30,
+  //     { align: "center" }
+  //   );
+  // };
 
   const addWrappedText = (text: string, x: number, maxWidth: number) => {
     const lines: string[] = doc.splitTextToSize(text, maxWidth);
@@ -112,11 +113,11 @@ export async function generateServiceAgreementPDF(data: ServiceAgreementData, re
   };
 
   // ============ PAGINATION ============
-
-  doc.setFontSize(10);
-  doc.setTextColor(80);
+  const page = doc.getNumberOfPages();
+  doc.setFontSize(16);
+  doc.setTextColor(10);
   doc.setFont("helvetica", "normal");
-  doc.text("Service Agreement", pageWidth - margin, y, { align: "right" });
+  doc.text(`Service Agreement – Page ${page}`, pageWidth - margin, y, { align: "right" });
   y += sectionGap;
 
   // ============ LOGO ============
@@ -124,7 +125,7 @@ export async function generateServiceAgreementPDF(data: ServiceAgreementData, re
     try {
       const img = await loadImage(data.logoUrl);
       const maxLogoH = 50;
-      const maxLogoW = 180;
+      const maxLogoW = 120;
       const ratio = Math.min(maxLogoW / img.width, maxLogoH / img.height);
       const logoW = img.width * ratio;
       const logoH = img.height * ratio;
@@ -134,13 +135,6 @@ export async function generateServiceAgreementPDF(data: ServiceAgreementData, re
       // If logo fails to load, skip it
     }
   }
-
-  // ============ HEADER ============
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(16);
-  doc.setTextColor(30);
-  doc.text(data.providerDBA || data.providerName, pageWidth / 2, y, { align: "center" });
-  y += lineHeight + 2;
 
   // Customer / Date / Location / Contractor
   doc.setFontSize(10);
@@ -165,6 +159,7 @@ export async function generateServiceAgreementPDF(data: ServiceAgreementData, re
   // ============ I. Contractor Responsibility ============
   addSectionHeader("I", "Contractor Responsibility");
   addBulletList(data.contractorResponsibilities);
+  addBulletList([`Contractor agrees to provide service ${data.timesPerWeek} times per week after regular business hours unless otherwise mutually agreed.`]);
 
   // ============ II. Customer Responsibility ============
   addSectionHeader("II", "Customer Responsibility");
@@ -173,11 +168,12 @@ export async function generateServiceAgreementPDF(data: ServiceAgreementData, re
   // ============ III. Insurance Coverage ============
   addSectionHeader("III", "Insurance Coverage");
   addWrappedText(data.insuranceText, margin, contentWidth);
+  addBulletList(data.insuranceBullets);
 
   // ============ IV. Period of Agreement ============
   addSectionHeader("IV", "Period of Agreement");
-  const periodFull = `Service will commence on ${data.billingStartDate}. ${data.periodText}`;
-  addWrappedText(periodFull, margin, contentWidth);
+  const periodFull1 = `Service will commence on ${data.billingStartDate}. Service will continue (with the price in Section VI protected) for one year or until canceled by thirty (30) days' written notice by either party.`;
+  addWrappedText(periodFull1, margin, contentWidth);
 
   // ============ V. Changes in Specifications ============
   addSectionHeader("V", "Changes in Specifications or Frequencies");
@@ -186,19 +182,23 @@ export async function generateServiceAgreementPDF(data: ServiceAgreementData, re
   // ============ VI. Cost of Service and Invoicing ============
   addSectionHeader("VI", "Cost of Service and Invoicing");
 
-  const costText = `a. Customer agrees to pay contractor the sum of $${data.totalBill.toFixed(2)} per month for service(s) ${data.timesPerWeek} time(s) per week, ${data.numPeople} staff member(s), ${data.hoursPerPerson} hour(s) each.`;
+  const costText = `a. Customer agrees to pay contractor the sum of $${data.totalBill.toFixed(2)} per month for service(s) ${data.timesPerWeek} time(s) per week on the last day of the same month in which work is performed.`;
   addWrappedText(costText, margin, contentWidth);
   y += 4;
 
   if (data.billingDate) {
-    addWrappedText(`b. Payment Terms: ${data.billingDate}`, margin, contentWidth);
+    addWrappedText(`b. Customer will be invoiced on or by the day before service commencement of the same month`, margin, contentWidth);
+    // addWrappedText(`b. Payment Terms: ${data.billingDate}`, margin, contentWidth);
     y += 4;
   }
 
-  addWrappedText(`c. ${data.invoiceNote}`, margin, contentWidth);
+  addWrappedText(`c. ${data.invoiceNote[0]}`, margin, contentWidth);
   y += 4;
 
-  addWrappedText("d. Unless noted, customer agrees that the following services are separate from this contract and can be quoted upon request:", margin, contentWidth);
+  addWrappedText(`d. ${data.invoiceNote[1]}`, margin, contentWidth);
+  y += 4;
+
+  addWrappedText("e. Unless noted, customer agrees that the following services are separate from this contract and can be quoted upon request:", margin, contentWidth);
   y += 4;
 
   data.extraServices.forEach((svc) => {
@@ -210,7 +210,7 @@ export async function generateServiceAgreementPDF(data: ServiceAgreementData, re
   });
   y += 4;
 
-  addWrappedText(`e. ${data.thirdPartyNote}`, margin, contentWidth);
+  addWrappedText(`f. ${data.thirdPartyNote}`, margin, contentWidth);
 
   // ============ VII. Signatures ============
   addSectionHeader("VII", "Signatures");

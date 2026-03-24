@@ -13,10 +13,11 @@ export interface AgreementTemplate {
   contractorResponsibilities: string[];
   customerResponsibilities: string[];
   insuranceText: string;
+  insuranceBullets: string[];
   periodText: string;
   changesText: string;
   extraServices: { label: string; price: string }[];
-  invoiceNote: string;
+  invoiceNote: string[];
   thirdPartyNote: string;
   signaturesNote: string;
   pricesValidDays: string;
@@ -66,12 +67,11 @@ const defaultAgreementTemplate: AgreementTemplate = {
   contractorResponsibilities: [
     "Contractor agrees to provide all services as described below.",
     "Contractor agrees to provide all labor, equipment and cleaning supplies.",
-    "Contractor agrees to provide service as scheduled after regular business hours unless otherwise mutually agreed.",
   ],
   customerResponsibilities: [
     "Customer agrees to provide adequate and secure storage facilities for contractor's equipment and supplies.",
     "Customer agrees to provide adequate water and electrical facilities for use of contractor.",
-    "Customer agrees to provide access cards/keys for contractor's use.",
+    "Customer agrees to provide two sets of key access cards per time range indicated above for contractor’s use",
     "Customer to furnish all trash bags, paper products and soap. If client requests, contractor can provide and deliver these items for a competitive price.",
     "Customer agrees to provide adequate trash disposal facilities.",
     "Customer agrees that contractor is not responsible for cleaning any blood or human fluid spills and that these spills will be cleaned upon occurrence by the customer.",
@@ -79,8 +79,13 @@ const defaultAgreementTemplate: AgreementTemplate = {
     "Customer agrees not to employ in a similar position any contractor employee or franchisee assigned to service customer's facilities during the life of this agreement and for a period of three months following termination of this agreement.",
     "Customer understands Contractor's performance and provision of requested services are subject to the availability of products, tools and labor.",
   ],
-  insuranceText: "Contractor agrees to keep insurance coverage(s) in force during the term of the agreement.",
-  periodText: "Service will continue (with the price protected) for one year or until canceled by thirty (30) days' written notice by either party.",
+  insuranceText: "Contractor agrees to keep the following insurance coverage(s) in force during the term of the agreement:",
+  insuranceBullets: [
+    "Workers Compensation (Policy limits per state statue)",
+    "Comprehensive General Liability ($1,000,000 per occurrence)",
+    "$10,000 Fidelity Bond for all employees",
+  ],
+  periodText: "Service will continue (with the price in Section VI protected) for one year or until canceled by thirty (30) days' written notice by either party.",
   changesText: "Customer and contractor agree that specifications, frequencies or work assignments may be altered at any time by written notice. Contractor and customer will negotiate the cost of service changes.",
   extraServices: [
     { label: "Refrigerator inside cleaning", price: "$35 each" },
@@ -88,8 +93,11 @@ const defaultAgreementTemplate: AgreementTemplate = {
     { label: "Extra tasks or special cleaning not on specifications", price: "$25 per hour" },
     { label: "Window washing", price: "Quote upon request" },
   ],
-  invoiceNote: "Prices quoted do not include applicable sales tax and are subject to change. Customer understands pricing is subject to change if costs of products, tools or labor increase.",
-  thirdPartyNote: "Office Pride does not assume costs relating to customer payment and invoice processing. Customer agrees to pay any third-party invoicing portal or payment disbursement company that is utilized by the customer and said services incur an expense or fee, said costs will be reverted to the customer and added to the quoted price.",
+  invoiceNote: [
+    "Prices quoted do not include applicable sales tax and are subject to change.",
+    "Customer understands pricing is subject to change if costs of products, tools or labor increase.",
+  ],
+  thirdPartyNote: "Office Pride does not assume costs relating to customer payment and invoice processing. Customer agrees to pay any third-party invoicing portal or payment disbursement company that is utilized by the customer and said services incur an expense or fee to Office Pride, said costs will be reverted to the customer and added to the quoted price",
   signaturesNote: "THE UNDERSIGNED HAVE READ, UNDERSTAND and ACCEPT THIS AGREEMENT, and by signing this Agreement, all parties agree to all of the aforementioned terms, conditions and policies.",
   pricesValidDays: "Prices quoted are valid for thirty (30) days from date of presentation.",
   copyrightText: "",
@@ -97,13 +105,13 @@ const defaultAgreementTemplate: AgreementTemplate = {
 };
 
 export const defaultTemplateSettings: TemplateSettings = {
-  companyName: "Office Pride Commercial Cleaning Services",
+  companyName: "Egusquiza Offices Solutions",
   companyAddress: "Fort Lauderdale - Hollywood",
   companyPhone: "(954) 998-3518",
   companyEmail: "CarlosEgusquiza@officepride.com",
   logoUrl: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRW5IPUIyqinvCTRmkBi6zcv0ppV8nO-v-ZUA&s",
   billingDate: "Due upon receipt",
-  hourlyRate: 25,
+  hourlyRate: 24,
   proposalTemplate: defaultProposalTemplate,
   agreementTemplate: defaultAgreementTemplate,
 };

@@ -78,11 +78,18 @@ const CleaningCalculator = () => {
 
     const date = new Date().toLocaleDateString();
 
-    // Add logo
+    // ============ HEADER ============
+    doc.setFontSize(16);
+    doc.setTextColor(10);
+    doc.setFont("helvetica", "normal");
+    doc.text(settings.proposalTemplate.title, pageWidth - margin, y, { align: "right" });
+    y += lineHeight + 2;
+
+    // ============ LOGO ============
     try {
       const logoImg = await loadImage(officePrideLogo);
       const maxLogoH = 50;
-      const maxLogoW = 180;
+      const maxLogoW = 120;
       const ratio = Math.min(maxLogoW / logoImg.width, maxLogoH / logoImg.height);
       const logoW = logoImg.width * ratio;
       const logoH = logoImg.height * ratio;
@@ -92,11 +99,7 @@ const CleaningCalculator = () => {
       // Skip logo if it fails to load
     }
 
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(18);
-    addText(settings.proposalTemplate.title, { align: "center", x: pageWidth / 2 });
-    y += sectionSpacing;
-
+    // Customer / Date / Location / Contractor
     doc.setFontSize(12);
     doc.setFont("helvetica", "normal");
     addText(`Customer: ${clientName}`);
