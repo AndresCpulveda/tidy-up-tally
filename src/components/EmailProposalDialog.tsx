@@ -187,15 +187,16 @@ export default function EmailProposalDialog({
     try {
       const attachments: { filename: string; content: string }[] = [];
       const date = new Date().toLocaleDateString();
+      const safeName = companyName.trim() || "Client";
 
       if (includeProposal) {
         const proposalBase64 = generateProposalPdfBase64();
-        attachments.push({ filename: `cleaning-proposal-${date}.pdf`, content: proposalBase64 });
+        attachments.push({ filename: `${safeName} - Cleaning Specifications - ${date}.pdf`, content: proposalBase64 });
       }
 
       if (includeAgreement) {
         const agreementBase64 = await generateServiceAgreementPDF(getAgreementData(), true);
-        attachments.push({ filename: `service-agreement-${date}.pdf`, content: agreementBase64 });
+        attachments.push({ filename: `${safeName} - Service Agreement - ${date}.pdf`, content: agreementBase64 });
       }
 
       const subjectParts: string[] = [];

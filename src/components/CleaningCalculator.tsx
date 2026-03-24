@@ -135,7 +135,8 @@ const CleaningCalculator = () => {
       doc.text(settings.proposalTemplate.footerText, pageWidth / 2, pageHeight - 30, { align: "center" });
       doc.text(`Page ${i}`, pageWidth - margin, pageHeight - 30, { align: "right" });
     }
-    doc.save(`cleaning-specifications-${date}.pdf`);
+    const safeName = clientName.trim() || "Client";
+    doc.save(`${safeName} - Cleaning Specifications - ${date}.pdf`);
   };
 
   return (

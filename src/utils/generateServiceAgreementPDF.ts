@@ -261,7 +261,8 @@ export async function generateServiceAgreementPDF(data: ServiceAgreementData, re
   if (returnBase64) {
     return doc.output("datauristring").split(",")[1];
   }
-  doc.save(`service-agreement-${data.date}.pdf`);
+  const safeName = (data.clientName || "Client").trim();
+  doc.save(`${safeName} - Service Agreement - ${data.date}.pdf`);
   return "";
 }
 
