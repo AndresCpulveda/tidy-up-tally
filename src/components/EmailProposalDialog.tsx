@@ -187,7 +187,7 @@ export default function EmailProposalDialog({
     try {
       const attachments: { filename: string; content: string }[] = [];
       const date = new Date().toLocaleDateString();
-      const safeName = clientName.trim() || "Client";
+      const safeName = companyName.trim() || "Client";
 
       if (includeProposal) {
         const proposalBase64 = generateProposalPdfBase64();
