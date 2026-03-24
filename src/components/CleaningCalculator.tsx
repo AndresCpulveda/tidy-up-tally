@@ -1,4 +1,3 @@
-import { useState } from "react";
 import {
   FileDown, FileText, Settings, Users, Clock, CalendarDays,
   ArrowRight, ArrowLeft, Building2, Phone, Mail as MailIcon, Globe, Palette,
@@ -7,25 +6,36 @@ import officePrideLogo from "@/assets/office-pride-logo.png";
 import { Link } from "react-router-dom";
 import jsPDF from "jspdf";
 import { useTemplateSettings } from "@/context/TemplateSettingsContext";
+import { useCalculatorForm } from "@/context/CalculatorFormContext";
 import EmailProposalDialog from "@/components/EmailProposalDialog";
 import { generateServiceAgreementPDF } from "@/utils/generateServiceAgreementPDF";
 
 const CleaningCalculator = () => {
   const { settings } = useTemplateSettings();
-  const [step, setStep] = useState(1);
+  const { form, updateForm } = useCalculatorForm();
 
-  // Step 1 — Client info
-  const [clientName, setClientName] = useState("");
-  const [clientAddress, setClientAddress] = useState("");
-  const [clientPhone, setClientPhone] = useState("");
-  const [clientEmail, setClientEmail] = useState("");
-  const [billingStartDate, setBillingStartDate] = useState("");
+  const step = form.step;
+  const setStep = (s: number) => updateForm({ step: s });
 
-  // Step 2 — Estimate details
-  const [numPeople, setNumPeople] = useState<string>("");
-  const [hoursPerPerson, setHoursPerPerson] = useState<string>("");
-  const [timesPerWeek, setTimesPerWeek] = useState<string>("");
-  const [billingTerms, setBillingTerms] = useState("Due upon receipt");
+  const clientName = form.clientName;
+  const setClientName = (v: string) => updateForm({ clientName: v });
+  const clientAddress = form.clientAddress;
+  const setClientAddress = (v: string) => updateForm({ clientAddress: v });
+  const clientPhone = form.clientPhone;
+  const setClientPhone = (v: string) => updateForm({ clientPhone: v });
+  const clientEmail = form.clientEmail;
+  const setClientEmail = (v: string) => updateForm({ clientEmail: v });
+  const billingStartDate = form.billingStartDate;
+  const setBillingStartDate = (v: string) => updateForm({ billingStartDate: v });
+
+  const numPeople = form.numPeople;
+  const setNumPeople = (v: string) => updateForm({ numPeople: v });
+  const hoursPerPerson = form.hoursPerPerson;
+  const setHoursPerPerson = (v: string) => updateForm({ hoursPerPerson: v });
+  const timesPerWeek = form.timesPerWeek;
+  const setTimesPerWeek = (v: string) => updateForm({ timesPerWeek: v });
+  const billingTerms = form.billingTerms;
+  const setBillingTerms = (v: string) => updateForm({ billingTerms: v });
 
   const people = parseFloat(numPeople) || 0;
   const hours = parseFloat(hoursPerPerson) || 0;
