@@ -220,13 +220,10 @@ export async function generateServiceAgreementPDF(data: ServiceAgreementData, re
     y += 4;
   }
 
-  addWrappedText(`c. ${data.invoiceNote[0]}`, margin, contentWidth);
+  addWrappedText(`c. ${data.invoiceNote}`, margin, contentWidth);
   y += 4;
 
-  addWrappedText(`d. ${data.invoiceNote[1]}`, margin, contentWidth);
-  y += 4;
-
-  addWrappedText("e. Unless noted, customer agrees that the following services are separate from this contract and can be quoted upon request:", margin, contentWidth);
+  addWrappedText("d. Unless noted, customer agrees that the following services are separate from this contract and can be quoted upon request:", margin, contentWidth);
   y += 4;
 
   data.extraServices.forEach((svc) => {
@@ -238,7 +235,7 @@ export async function generateServiceAgreementPDF(data: ServiceAgreementData, re
   });
   y += 4;
 
-  addWrappedText(`f. ${data.thirdPartyNote}`, margin, contentWidth);
+  addWrappedText(`e. ${data.thirdPartyNote}`, margin, contentWidth);
 
   // ============ VII. Signatures ============
   addSectionHeader("VII", "Signatures");

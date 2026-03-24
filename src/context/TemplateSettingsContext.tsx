@@ -17,7 +17,7 @@ export interface AgreementTemplate {
   periodText: string;
   changesText: string;
   extraServices: { label: string; price: string }[];
-  invoiceNote: string[];
+  invoiceNote: string;
   thirdPartyNote: string;
   signaturesNote: string;
   pricesValidDays: string;
@@ -93,10 +93,7 @@ const defaultAgreementTemplate: AgreementTemplate = {
     { label: "Extra tasks or special cleaning not on specifications", price: "$25 per hour" },
     { label: "Window washing", price: "Quote upon request" },
   ],
-  invoiceNote: [
-    "Prices quoted do not include applicable sales tax and are subject to change.",
-    "Customer understands pricing is subject to change if costs of products, tools or labor increase.",
-  ],
+  invoiceNote: "Prices quoted do not include applicable sales tax and are subject to change. Customer understands pricing is subject to change if costs of products, tools or labor increase.",
   thirdPartyNote: "Office Pride does not assume costs relating to customer payment and invoice processing. Customer agrees to pay any third-party invoicing portal or payment disbursement company that is utilized by the customer and said services incur an expense or fee to Office Pride, said costs will be reverted to the customer and added to the quoted price",
   signaturesNote: "THE UNDERSIGNED HAVE READ, UNDERSTAND and ACCEPT THIS AGREEMENT, and by signing this Agreement, all parties agree to all of the aforementioned terms, conditions and policies.",
   pricesValidDays: "Prices quoted are valid for thirty (30) days from date of presentation.",
