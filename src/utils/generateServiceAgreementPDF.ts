@@ -28,7 +28,7 @@ interface ServiceAgreementData {
   periodText: string;
   changesText: string;
   extraServices: { label: string; price: string }[];
-  invoiceNote: string;
+  invoiceNote: string[];
   thirdPartyNote: string;
   signaturesNote: string;
   pricesValidDays: string;
@@ -172,8 +172,36 @@ export async function generateServiceAgreementPDF(data: ServiceAgreementData, re
 
   // ============ IV. Period of Agreement ============
   addSectionHeader("IV", "Period of Agreement");
-  const periodFull1 = `Service will commence on ${data.billingStartDate}. Service will continue (with the price in Section VI protected) for one year or until canceled by thirty (30) days' written notice by either party.`;
-  addWrappedText(periodFull1, margin, contentWidth);
+  // Render "Service will commence on " then bold date, then rest
+  const periodPre = "Service will commence on ";
+  const periodPost = ". Service will continue (with the price in Section VI protected) for one year or until canceled by thirty (30) days' written notice by either party.";
+  
+  addPageIfNeeded(lineHeight);
+  doc.setFont("helvetica", "normal");
+  const preWidth = doc.getTextWidth(periodPre);
+  doc.text(periodPre, margin, y);
+  doc.setFont("helvetica", "bold");
+  const dateWidth = doc.getTextWidth(data.billingStartDate);
+  doc.text(data.billingStartDate, margin + preWidth, y);
+  doc.setFont("helvetica", "normal");
+  
+  // Check if the rest fits on the same line or needs wrapping
+  const remainingX = margin + preWidth + dateWidth;
+  const remainingWidth = contentWidth - preWidth - dateWidth;
+  if (remainingWidth > 20) {
+    const postLines: string[] = doc.splitTextToSize(periodPost, remainingWidth);
+    doc.text(postLines[0], remainingX, y);
+    y += lineHeight;
+    // Wrap remaining lines at full width
+    for (let i = 1; i < postLines.length; i++) {
+      addPageIfNeeded(lineHeight);
+      doc.text(postLines[i], margin, y);
+      y += lineHeight;
+    }
+  } else {
+    y += lineHeight;
+    addWrappedText(periodPost, margin, contentWidth);
+  }
 
   // ============ V. Changes in Specifications ============
   addSectionHeader("V", "Changes in Specifications or Frequencies");
