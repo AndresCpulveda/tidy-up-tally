@@ -211,7 +211,7 @@ const Templates = () => {
                   </div>
                 </div>
 
-                <AreaField label="Invoice Note" value={agreementTemplate.invoiceNote} onChange={(v) => updateAgreement({ invoiceNote: v })} />
+                <AreaField label="Invoice Note" value={agreementTemplate.invoiceNote.join("\n")} onChange={(v) => updateAgreement({ invoiceNote: v.split("\n") })} />
                 <AreaField label="Third-Party Processing Note" value={agreementTemplate.thirdPartyNote} onChange={(v) => updateAgreement({ thirdPartyNote: v })} />
                 <AreaField label="VII. Signatures Note" value={agreementTemplate.signaturesNote} onChange={(v) => updateAgreement({ signaturesNote: v })} />
                 <Field label="Prices Valid Days Text" value={agreementTemplate.pricesValidDays} onChange={(v) => updateAgreement({ pricesValidDays: v })} />
