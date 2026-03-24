@@ -28,7 +28,7 @@ interface ServiceAgreementData {
   periodText: string;
   changesText: string;
   extraServices: { label: string; price: string }[];
-  invoiceNote: string[];
+  invoiceNote: string;
   thirdPartyNote: string;
   signaturesNote: string;
   pricesValidDays: string;
