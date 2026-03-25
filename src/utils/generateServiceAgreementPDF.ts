@@ -58,10 +58,23 @@ export async function generateServiceAgreementPDF(data: ServiceAgreementData, re
 
   const addPageIfNeeded = (space = 30) => {
     if (y + space > pageHeight - 60) {
-      // addFooter();
+      // Save current font state
+      const prevFontSize = doc.getFontSize();
+      const prevFont = doc.getFont();
+      const prevTextColor = (doc as any).getTextColor?.() ?? null;
+
       doc.addPage();
       y = margin;
-      addPagination()
+      addPagination();
+
+      // Restore font state after pagination header
+      doc.setFontSize(prevFontSize);
+      doc.setFont(prevFont.fontName, prevFont.fontStyle);
+      if (prevTextColor) {
+        doc.setTextColor(prevTextColor);
+      } else {
+        doc.setTextColor(50);
+      }
     }
   };
 
