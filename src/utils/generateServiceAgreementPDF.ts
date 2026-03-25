@@ -340,46 +340,87 @@ export async function generateServiceAgreementPDF(data: ServiceAgreementData, re
 
 export function buildServiceAgreementHtml(data: ServiceAgreementData): string {
   const bulletHtml = (items: string[]) =>
-    items.map((i) => `<li style="margin-bottom:4px;">${i}</li>`).join("");
+    items.map((i) => `<li style="margin-bottom:2px;">${i}</li>`).join("");
+
+  const extraServicesHtml = data.extraServices
+    .map(
+      (svc) =>
+        `<div style="display:flex;justify-content:space-between;padding:0 8px;"><span>•  ${svc.label}</span><span>${svc.price}</span></div>`
+    )
+    .join("");
+
+  const dbaRow = data.providerDBA
+    ? `<tr><td style="padding:2px 0;font-weight:700;width:80px;vertical-align:top;">DBA:</td><td style="padding:2px 0;">${data.providerDBA}</td></tr>`
+    : "";
 
   return `
-    <div style="font-family:Arial,sans-serif;max-width:650px;margin:0 auto;padding:24px;">
-      ${data.logoUrl ? `<div style="text-align:center;margin-bottom:12px;"><img src="${data.logoUrl}" style="max-height:60px;max-width:200px;" /></div>` : ""}
-      <h1 style="text-align:center;color:#1a1a1a;font-size:20px;">${data.providerDBA || data.providerName}</h1>
-      <p style="text-align:center;color:#666;font-size:12px;">Service Agreement</p>
-      <hr style="border:none;border-top:1px solid #e5e5e5;margin:16px 0;" />
+    <div style="font-family:Helvetica,Arial,sans-serif;max-width:595px;margin:0 auto;padding:50px;font-size:10px;color:#323232;line-height:1.5;">
+      <div style="text-align:right;font-size:16px;color:#0a0a0a;margin-bottom:20px;">Service Agreement – Page 1</div>
 
-      <table style="width:100%;font-size:13px;color:#333;margin-bottom:16px;">
-        <tr><td style="padding:4px 0;font-weight:600;width:100px;">Customer:</td><td>${data.clientName}</td></tr>
-        <tr><td style="padding:4px 0;font-weight:600;">Date:</td><td>${data.date}</td></tr>
-        <tr><td style="padding:4px 0;font-weight:600;">Location:</td><td>${data.clientAddress}</td></tr>
-        <tr><td style="padding:4px 0;font-weight:600;">Contractor:</td><td>${data.providerName}</td></tr>
+      ${data.logoUrl ? `<div style="margin-bottom:10px;"><img src="${data.logoUrl}" style="max-height:50px;max-width:120px;" /></div>` : ""}
+
+      <table style="font-size:10px;color:#323232;margin-bottom:16px;border-collapse:collapse;">
+        <tr><td style="padding:2px 0;font-weight:700;width:80px;vertical-align:top;">Customer:</td><td style="padding:2px 0;">${data.clientName}</td></tr>
+        <tr><td style="padding:2px 0;font-weight:700;vertical-align:top;">Date:</td><td style="padding:2px 0;">${data.date}</td></tr>
+        <tr><td style="padding:2px 0;font-weight:700;vertical-align:top;">Location:</td><td style="padding:2px 0;">${data.clientAddress}</td></tr>
+        <tr><td style="padding:2px 0;font-weight:700;vertical-align:top;">Contractor:</td><td style="padding:2px 0;">${data.providerName}</td></tr>
+        ${dbaRow}
       </table>
 
-      <h3 style="color:#1a1a1a;">I. Contractor Responsibility</h3>
-      <ul style="font-size:13px;color:#333;">${bulletHtml(data.contractorResponsibilities)}</ul>
-
-      <h3 style="color:#1a1a1a;">II. Customer Responsibility</h3>
-      <ul style="font-size:13px;color:#333;">${bulletHtml(data.customerResponsibilities)}</ul>
-
-      <h3 style="color:#1a1a1a;">III. Insurance Coverage</h3>
-      <p style="font-size:13px;color:#333;">${data.insuranceText}</p>
-
-      <h3 style="color:#1a1a1a;">IV. Period of Agreement</h3>
-      <p style="font-size:13px;color:#333;">Service will commence on ${data.billingStartDate}. ${data.periodText}</p>
-
-      <h3 style="color:#1a1a1a;">V. Changes in Specifications</h3>
-      <p style="font-size:13px;color:#333;">${data.changesText}</p>
-
-      <h3 style="color:#1a1a1a;">VI. Cost of Service</h3>
-      <div style="background:#22785a;color:#fff;padding:12px;border-radius:8px;text-align:center;font-size:18px;font-weight:700;">
-        Monthly Fee: $${data.totalBill.toFixed(2)}
+      <div style="margin-top:20px;">
+        <div style="font-weight:700;font-size:12px;color:#1e1e1e;margin-bottom:6px;">I. Contractor Responsibility</div>
+        <ul style="margin:0;padding-left:22px;list-style:disc;">${bulletHtml([...data.contractorResponsibilities, `Contractor agrees to provide service ${data.timesPerWeek} times per week after regular business hours unless otherwise mutually agreed.`])}</ul>
       </div>
 
-      <h3 style="color:#1a1a1a;">VII. Signatures</h3>
-      <p style="font-size:12px;color:#666;">${data.signaturesNote}</p>
+      <div style="margin-top:20px;">
+        <div style="font-weight:700;font-size:12px;color:#1e1e1e;margin-bottom:6px;">II. Customer Responsibility</div>
+        <ul style="margin:0;padding-left:22px;list-style:disc;">${bulletHtml(data.customerResponsibilities)}</ul>
+      </div>
 
-      <p style="margin-top:24px;color:#999;font-size:11px;">${data.footerDisclaimer}</p>
+      <div style="margin-top:20px;">
+        <div style="font-weight:700;font-size:12px;color:#1e1e1e;margin-bottom:6px;">III. Insurance Coverage</div>
+        <p style="margin:0 0 4px 0;">${data.insuranceText}</p>
+        <ul style="margin:0;padding-left:22px;list-style:disc;">${bulletHtml(data.insuranceBullets)}</ul>
+      </div>
+
+      <div style="margin-top:20px;">
+        <div style="font-weight:700;font-size:12px;color:#1e1e1e;margin-bottom:6px;">IV. Period of Agreement</div>
+        <p style="margin:0;">Service will commence on <strong>${data.billingStartDate}</strong>. Service will continue (with the price in Section VI protected) for one year or until canceled by thirty (30) days' written notice by either party.</p>
+      </div>
+
+      <div style="margin-top:20px;">
+        <div style="font-weight:700;font-size:12px;color:#1e1e1e;margin-bottom:6px;">V. Changes in Specifications or Frequencies</div>
+        <p style="margin:0;">${data.changesText}</p>
+      </div>
+
+      <div style="margin-top:20px;">
+        <div style="font-weight:700;font-size:12px;color:#1e1e1e;margin-bottom:6px;">VI. Cost of Service and Invoicing</div>
+        <p style="margin:0 0 4px 0;">a. Customer agrees to pay contractor the sum of <strong>$${data.totalBill.toFixed(2)} per month</strong> for service(s) <strong>${data.timesPerWeek} time(s) per week</strong> on the last day of the same month in which work is performed.</p>
+        ${data.billingDate ? `<p style="margin:0 0 4px 0;">b. Customer will be invoiced on or by the day before service commencement of the same month</p>` : ""}
+        <p style="margin:0 0 4px 0;">c. ${data.invoiceNote}</p>
+        <p style="margin:0 0 4px 0;">d. Unless noted, customer agrees that the following services are separate from this contract and can be quoted upon request:</p>
+        <div style="padding-left:8px;margin-bottom:4px;">${extraServicesHtml}</div>
+        <p style="margin:0;">e. ${data.thirdPartyNote}</p>
+      </div>
+
+      <div style="margin-top:20px;">
+        <div style="font-weight:700;font-size:12px;color:#1e1e1e;margin-bottom:6px;">VII. Signatures</div>
+        <p style="margin:0 0 10px 0;">${data.signaturesNote}</p>
+        <div style="margin-bottom:12px;">
+          <span style="font-weight:700;">Customer:</span> ${data.clientName}<br/>
+          <span style="padding-left:20px;">Printed Name: ______________________________</span><br/>
+          <span style="padding-left:20px;">Signature: ______________________________&nbsp;&nbsp;&nbsp;&nbsp;Date: ______________</span>
+        </div>
+        <div style="margin-bottom:12px;">
+          <span style="font-weight:700;">Contractor:</span> ${data.providerDBA || data.providerName}<br/>
+          <span style="padding-left:20px;">Printed Name: ______________________________</span><br/>
+          <span style="padding-left:20px;">Signature: ______________________________&nbsp;&nbsp;&nbsp;&nbsp;Date: ______________</span>
+        </div>
+      </div>
+
+      ${data.pricesValidDays ? `<p style="margin-top:10px;font-size:8px;color:#787878;">${data.pricesValidDays}</p>` : ""}
+      ${data.copyrightText ? `<p style="font-size:8px;color:#787878;">${data.copyrightText}</p>` : ""}
+      <p style="text-align:center;font-size:8px;color:#828282;margin-top:20px;">${data.footerDisclaimer}</p>
     </div>
   `;
 }
