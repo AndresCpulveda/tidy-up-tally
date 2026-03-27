@@ -35,6 +35,7 @@ export interface TemplateSettings {
   hourlyRate: number;
   proposalTemplate: ProposalTemplate;
   agreementTemplate: AgreementTemplate;
+  emailBodyTemplate: string;
 }
 
 const defaultProposalTemplate: ProposalTemplate = {
