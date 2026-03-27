@@ -10,7 +10,7 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const { recipientEmail, subject, bodyHtml, attachments } = await req.json();
+    const { recipientEmail, subject, bodyText, attachments } = await req.json();
 
     if (!recipientEmail) {
       return new Response(
@@ -32,7 +32,8 @@ Deno.serve(async (req) => {
       from: "Cleaning Proposal <onboarding@resend.dev>",
       to: [recipientEmail],
       subject: subject || "Your Cleaning Service Documents",
-      html: bodyHtml || "Please find the attached documents. 1014",
+      // html: bodyText || "Please find the attached documents.",
+      html: "<p>Probando probando</p>"
     };
 
     // Add attachments if provided (array of { filename, content (base64) })

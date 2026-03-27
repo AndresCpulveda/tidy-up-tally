@@ -206,8 +206,8 @@ export default function EmailProposalDialog({
       const { data, error } = await supabase.functions.invoke("send-proposal-email", {
         body: {
           recipientEmail: email,
-          subject: `Cleaning ${subjectParts.join(" & ")} for ${companyName}`,
-          html: `<div style="font-family: Arial, sans-serif; padding: 20px;">
+          subject: `Cleaning ${subjectParts.join(" & ")} — $${totalBill.toFixed(2)}/month`,
+          bodyText: `<div style="font-family: Arial, sans-serif; padding: 20px;">
             <p>Hi,</p>
 
             <p>
@@ -265,6 +265,7 @@ export default function EmailProposalDialog({
           attachments,
         },
       });
+
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
 
