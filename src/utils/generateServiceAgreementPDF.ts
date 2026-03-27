@@ -339,10 +339,10 @@ export async function generateServiceAgreementPDF(data: ServiceAgreementData, re
 }
 
 export function buildServiceAgreementHtml(data: ServiceAgreementData): string {
-  const bulletHtml = (items?: string[]) =>
-    (items || []).map((i) => `<li style="margin-bottom:2px;">${i}</li>`).join("");
+  const bulletHtml = (items: string[]) =>
+    items.map((i) => `<li style="margin-bottom:2px;">${i}</li>`).join("");
 
-  const extraServicesHtml = (data.extraServices || [])
+  const extraServicesHtml = data.extraServices
     .map(
       (svc) =>
         `<div style="display:flex;justify-content:space-between;padding:0 8px;"><span>•  ${svc.label}</span><span>${svc.price}</span></div>`
