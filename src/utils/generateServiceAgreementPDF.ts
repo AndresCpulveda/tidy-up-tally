@@ -273,7 +273,7 @@ export async function generateServiceAgreementPDF(data: ServiceAgreementData, re
   addWrappedText("d. Unless noted, customer agrees that the following services are separate from this contract and can be quoted upon request:", margin, contentWidth);
   y += 4;
 
-  data.extraServices.forEach((svc) => {
+  (data.extraServices || []).forEach((svc) => {
     addPageIfNeeded(lineHeight);
     doc.text(`•  ${svc.label}`, margin + 8, y);
     const priceX = pageWidth - margin;
