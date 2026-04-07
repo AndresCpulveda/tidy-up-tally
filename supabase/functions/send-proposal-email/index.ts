@@ -22,15 +22,7 @@ Deno.serve(async (req) => {
     const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
     if (!RESEND_API_KEY) {
       return new Response(
-        JSON.stringify({ error: "Email service not configured (RESEND_API_KEY)" }),
-        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
-    }
-
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) {
-      return new Response(
-        JSON.stringify({ error: "Email service not configured (LOVABLE_API_KEY)" }),
+        JSON.stringify({ error: "Email service not configured" }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
@@ -51,20 +43,19 @@ Deno.serve(async (req) => {
 
     // Add attachments if provided (array of { filename, content (base64) })
     if (attachments && Array.isArray(attachments) && attachments.length > 0) {
-      emailPayload.attachments = attachments.map((att: { filename: string; content: string }) => ({
-        filename: att.filename,
-        content: att.content,
-      }));
+      emailPayload.attachments = attachments
+        .filter((att: { filename?: string; content?: string }) => att && att.filename && att.content)
+        .map((att: { filename: string; content: string }) => ({
+          filename: att.filename,
+          content: att.content,
+        }));
     }
 
-    const GATEWAY_URL = "https://connector-gateway.lovable.dev/resend";
-
-    const res = await fetch(`${GATEWAY_URL}/emails`, {
+    const res = await fetch("https://api.resend.com/emails", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Authorization": `Bearer ${LOVABLE_API_KEY}`,
-        "X-Connection-Api-Key": RESEND_API_KEY,
+        Authorization: `Bearer ${RESEND_API_KEY}`,
       },
       body: JSON.stringify(emailPayload),
     });
@@ -72,7 +63,7 @@ Deno.serve(async (req) => {
     const data = await res.json();
 
     if (!res.ok) {
-      console.error("Resend error:", data);
+      console.error("Resend error:", JSON.stringify(data));
       return new Response(
         JSON.stringify({ error: data.message || "Failed to send email" }),
         { status: res.status, headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -86,7 +77,7 @@ Deno.serve(async (req) => {
   } catch (error) {
     console.error("Error:", error);
     return new Response(
-      JSON.stringify({ error: "Internal server error" }),
+      JSON.stringify({ error: error.message || "Internal server error" }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }
