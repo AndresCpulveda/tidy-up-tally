@@ -148,8 +148,8 @@ export default function EmailProposalDialog({
     return doc.output("datauristring").split(",")[1];
   };
 
-  const generateProposalBlobUrl = (): string => {
-    const base64 = generateProposalPdfBase64();
+  const generateProposalBlobUrl = async (): Promise<string> => {
+    const base64 = await generateProposalPdfBase64();
     const binary = atob(base64);
     const bytes = new Uint8Array(binary.length);
     for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
@@ -214,7 +214,7 @@ export default function EmailProposalDialog({
       const safeName = companyName.trim() || "Client";
 
       if (includeProposal) {
-        const proposalBase64 = generateProposalPdfBase64();
+        const proposalBase64 = await generateProposalPdfBase64();
         attachments.push({ filename: `${safeName} - Cleaning Specifications - ${date}.pdf`, content: proposalBase64 });
       }
 
