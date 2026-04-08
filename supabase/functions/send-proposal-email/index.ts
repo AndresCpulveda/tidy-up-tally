@@ -34,6 +34,11 @@ Deno.serve(async (req) => {
       subject: subject || "Your Cleaning Service Documents",
     };
 
+    // Add BCC if provided
+    if (bcc && Array.isArray(bcc) && bcc.length > 0) {
+      emailPayload.bcc = bcc;
+    }
+
     // Prefer HTML body, fall back to plain text
     if (bodyHtml) {
       emailPayload.html = bodyHtml;
