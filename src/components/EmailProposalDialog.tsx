@@ -59,11 +59,11 @@ export default function EmailProposalDialog({
   const { toast } = useToast();
   const { settings } = useTemplateSettings();
 
-  const generateProposalPdfBase64 = (): string => {
+  const generateProposalPdfBase64 = async (): Promise<string> => {
     const doc = new jsPDF({ unit: "pt", format: "a4" });
     const pageWidth = doc.internal.pageSize.getWidth();
     const pageHeight = doc.internal.pageSize.getHeight();
-    const margin = 60;
+    const margin = 50;
     let y = margin;
     const lineHeight = 18;
     const sectionSpacing = 25;
@@ -79,9 +79,33 @@ export default function EmailProposalDialog({
 
     const date = new Date().toLocaleDateString();
 
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(18);
-    addText(settings.proposalTemplate.title, { align: "center", x: pageWidth / 2 });
+    // ============ HEADER: Title on the right ============
+    doc.setFontSize(16);
+    doc.setTextColor(10);
+    doc.setFont("helvetica", "normal");
+    doc.text(settings.proposalTemplate.title, pageWidth - margin, y, { align: "right" });
+    y += lineHeight + 2;
+
+    // ============ LOGO on the left ============
+    try {
+      const loadImg = (url: string): Promise<HTMLImageElement> => new Promise((resolve, reject) => {
+        const img = new Image();
+        img.crossOrigin = "anonymous";
+        img.onload = () => resolve(img);
+        img.onerror = reject;
+        img.src = url;
+      });
+      const logoImg = await loadImg(officePrideLogo);
+      const maxLogoH = 50;
+      const maxLogoW = 120;
+      const ratio = Math.min(maxLogoW / logoImg.width, maxLogoH / logoImg.height);
+      const logoW = logoImg.width * ratio;
+      const logoH = logoImg.height * ratio;
+      doc.addImage(logoImg, "PNG", margin, margin - 20, logoW, logoH);
+      y += logoH + 10;
+    } catch {
+      // Skip logo if it fails to load
+    }
     y += sectionSpacing;
 
     doc.setFontSize(12);
@@ -124,8 +148,8 @@ export default function EmailProposalDialog({
     return doc.output("datauristring").split(",")[1];
   };
 
-  const generateProposalBlobUrl = (): string => {
-    const base64 = generateProposalPdfBase64();
+  const generateProposalBlobUrl = async (): Promise<string> => {
+    const base64 = await generateProposalPdfBase64();
     const binary = atob(base64);
     const bytes = new Uint8Array(binary.length);
     for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
@@ -160,7 +184,7 @@ export default function EmailProposalDialog({
       const urls: { proposal?: string; agreement?: string } = {};
 
       if (includeProposal) {
-        urls.proposal = generateProposalBlobUrl();
+        urls.proposal = await generateProposalBlobUrl();
       }
 
       if (includeAgreement) {
@@ -190,7 +214,7 @@ export default function EmailProposalDialog({
       const safeName = companyName.trim() || "Client";
 
       if (includeProposal) {
-        const proposalBase64 = generateProposalPdfBase64();
+        const proposalBase64 = await generateProposalPdfBase64();
         attachments.push({ filename: `${safeName} - Cleaning Specifications - ${date}.pdf`, content: proposalBase64 });
       }
 
