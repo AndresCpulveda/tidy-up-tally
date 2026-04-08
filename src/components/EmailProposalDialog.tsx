@@ -184,7 +184,7 @@ export default function EmailProposalDialog({
       const urls: { proposal?: string; agreement?: string } = {};
 
       if (includeProposal) {
-        urls.proposal = generateProposalBlobUrl();
+        urls.proposal = await generateProposalBlobUrl();
       }
 
       if (includeAgreement) {
