@@ -123,20 +123,59 @@ const TemplateSettingsContext = createContext<TemplateSettingsContextType | null
 
 const STORAGE_KEY = "cleaning-template-settings";
 
+type StoredTemplateSettings = Partial<TemplateSettings> & {
+  proposalTemplate?: Partial<ProposalTemplate>;
+  agreementTemplate?: Partial<AgreementTemplate>;
+};
+
+const arrayOrFallback = <T,>(value: T[] | undefined, fallback: T[]) =>
+  Array.isArray(value) ? value : fallback;
+
+function mergeTemplateSettings(stored?: StoredTemplateSettings | null): TemplateSettings {
+  return {
+    ...defaultTemplateSettings,
+    ...stored,
+    proposalTemplate: {
+      ...defaultProposalTemplate,
+      ...stored?.proposalTemplate,
+      weeklyTasks: arrayOrFallback(stored?.proposalTemplate?.weeklyTasks, defaultProposalTemplate.weeklyTasks),
+      monthlyTasks: arrayOrFallback(stored?.proposalTemplate?.monthlyTasks, defaultProposalTemplate.monthlyTasks),
+    },
+    agreementTemplate: {
+      ...defaultAgreementTemplate,
+      ...stored?.agreementTemplate,
+      contractorResponsibilities: arrayOrFallback(
+        stored?.agreementTemplate?.contractorResponsibilities,
+        defaultAgreementTemplate.contractorResponsibilities,
+      ),
+      customerResponsibilities: arrayOrFallback(
+        stored?.agreementTemplate?.customerResponsibilities,
+        defaultAgreementTemplate.customerResponsibilities,
+      ),
+      insuranceBullets: arrayOrFallback(
+        stored?.agreementTemplate?.insuranceBullets,
+        defaultAgreementTemplate.insuranceBullets,
+      ),
+      extraServices: arrayOrFallback(stored?.agreementTemplate?.extraServices, defaultAgreementTemplate.extraServices),
+    },
+  };
+}
+
 function loadSettings(): TemplateSettings {
   try {
     const stored = localStorage.getItem(STORAGE_KEY);
-    if (stored) return { ...defaultTemplateSettings, ...JSON.parse(stored) };
+    if (stored) return mergeTemplateSettings(JSON.parse(stored));
   } catch {}
-  return defaultTemplateSettings;
+  return mergeTemplateSettings();
 }
 
 export function TemplateSettingsProvider({ children }: { children: ReactNode }) {
   const [settings, setSettings] = useState<TemplateSettings>(loadSettings);
 
-  const persist = (next: TemplateSettings) => {
-    setSettings(next);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+  const persist = (next: StoredTemplateSettings) => {
+    const merged = mergeTemplateSettings(next);
+    setSettings(merged);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(merged));
   };
 
   const updateSettings = (partial: Partial<TemplateSettings>) => {
