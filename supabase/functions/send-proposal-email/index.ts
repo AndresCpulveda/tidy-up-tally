@@ -10,7 +10,7 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const { recipientEmail, subject, bodyText, bodyHtml, attachments } = await req.json();
+    const { recipientEmail, bcc, subject, bodyText, bodyHtml, attachments } = await req.json();
 
     if (!recipientEmail) {
       return new Response(

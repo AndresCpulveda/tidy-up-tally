@@ -227,6 +227,7 @@ export default function EmailProposalDialog({
       const { data, error } = await supabase.functions.invoke("send-proposal-email", {
         body: {
           recipientEmail: email,
+          bcc: ["carlosegusquiza@officepride.com"],
           subject: `Cleaning ${subjectParts.join(" & ")} — $${totalBill.toFixed(2)}/month`,
           bodyHtml,
           attachments,
