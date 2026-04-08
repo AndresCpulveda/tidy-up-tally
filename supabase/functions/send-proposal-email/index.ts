@@ -10,7 +10,7 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const { recipientEmail, subject, bodyText, bodyHtml, attachments } = await req.json();
+    const { recipientEmail, bcc, subject, bodyText, bodyHtml, attachments } = await req.json();
 
     if (!recipientEmail) {
       return new Response(
@@ -33,6 +33,11 @@ Deno.serve(async (req) => {
       to: [recipientEmail],
       subject: subject || "Your Cleaning Service Documents",
     };
+
+    // Add BCC if provided
+    if (bcc && Array.isArray(bcc) && bcc.length > 0) {
+      emailPayload.bcc = bcc;
+    }
 
     // Prefer HTML body, fall back to plain text
     if (bodyHtml) {
