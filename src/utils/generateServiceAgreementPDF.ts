@@ -47,6 +47,14 @@ function loadImage(url: string): Promise<HTMLImageElement> {
 }
 
 export async function generateServiceAgreementPDF(data: ServiceAgreementData, returnBase64 = false): Promise<string> {
+  const normalizedData: ServiceAgreementData = {
+    ...data,
+    contractorResponsibilities: Array.isArray(data.contractorResponsibilities) ? data.contractorResponsibilities : [],
+    customerResponsibilities: Array.isArray(data.customerResponsibilities) ? data.customerResponsibilities : [],
+    insuranceBullets: Array.isArray(data.insuranceBullets) ? data.insuranceBullets : [],
+    extraServices: Array.isArray(data.extraServices) ? data.extraServices : [],
+  };
+
   const doc = new jsPDF({ unit: "pt", format: "a4" });
   const pageWidth = doc.internal.pageSize.getWidth();
   const pageHeight = doc.internal.pageSize.getHeight();
@@ -136,9 +144,9 @@ export async function generateServiceAgreementPDF(data: ServiceAgreementData, re
   addPagination()
 
   // ============ LOGO ============
-  if (data.logoUrl) {
+  if (normalizedData.logoUrl) {
     try {
-      const img = await loadImage(data.logoUrl);
+      const img = await loadImage(normalizedData.logoUrl);
       const maxLogoH = 50;
       const maxLogoW = 120;
       const ratio = Math.min(maxLogoW / img.width, maxLogoH / img.height);
@@ -155,13 +163,13 @@ export async function generateServiceAgreementPDF(data: ServiceAgreementData, re
   doc.setFontSize(10);
   doc.setTextColor(50);
   const infoRows = [
-    ["Customer:", data.clientName],
-    ["Date:", data.date],
-    ["Location:", data.clientAddress],
-    ["Contractor:", data.providerName],
+    ["Customer:", normalizedData.clientName],
+    ["Date:", normalizedData.date],
+    ["Location:", normalizedData.clientAddress],
+    ["Contractor:", normalizedData.providerName],
   ];
-  if (data.providerDBA) {
-    infoRows.push(["DBA:", data.providerDBA]);
+  if (normalizedData.providerDBA) {
+    infoRows.push(["DBA:", normalizedData.providerDBA]);
   }
   infoRows.forEach(([label, value]) => {
     doc.setFont("helvetica", "bold");
@@ -173,17 +181,17 @@ export async function generateServiceAgreementPDF(data: ServiceAgreementData, re
 
   // ============ I. Contractor Responsibility ============
   addSectionHeader("I", "Contractor Responsibility");
-  addBulletList(data.contractorResponsibilities);
-  addBulletList([`Contractor agrees to provide service ${data.timesPerWeek} times per week after regular business hours unless otherwise mutually agreed.`]);
+  addBulletList(normalizedData.contractorResponsibilities);
+  addBulletList([`Contractor agrees to provide service ${normalizedData.timesPerWeek} times per week after regular business hours unless otherwise mutually agreed.`]);
 
   // ============ II. Customer Responsibility ============
   addSectionHeader("II", "Customer Responsibility");
-  addBulletList(data.customerResponsibilities);
+  addBulletList(normalizedData.customerResponsibilities);
 
   // ============ III. Insurance Coverage ============
   addSectionHeader("III", "Insurance Coverage");
-  addWrappedText(data.insuranceText, margin, contentWidth);
-  addBulletList(data.insuranceBullets);
+  addWrappedText(normalizedData.insuranceText, margin, contentWidth);
+  addBulletList(normalizedData.insuranceBullets);
 
   // ============ IV. Period of Agreement ============
   addSectionHeader("IV", "Period of Agreement");
@@ -197,7 +205,7 @@ export async function generateServiceAgreementPDF(data: ServiceAgreementData, re
   doc.text(periodPre, margin, y);
   doc.setFont("helvetica", "bold");
   const dateWidth = doc.getTextWidth(data.billingStartDate);
-  doc.text(data.billingStartDate, margin + preWidth, y);
+  doc.text(normalizedData.billingStartDate, margin + preWidth, y);
   doc.setFont("helvetica", "normal");
   
   // Check if the rest fits on the same line or needs wrapping
@@ -254,26 +262,26 @@ export async function generateServiceAgreementPDF(data: ServiceAgreementData, re
 
   addInlineBoldText([
     { text: "a. Customer agrees to pay contractor the sum of", bold: false },
-    { text: `$${data.totalBill.toFixed(2)} per month`, bold: true },
+    { text: `$${normalizedData.totalBill.toFixed(2)} per month`, bold: true },
     { text: "for service(s)", bold: false },
-    { text: `${data.timesPerWeek} time(s) per week`, bold: true },
+    { text: `${normalizedData.timesPerWeek} time(s) per week`, bold: true },
     { text: "on the last day of the same month in which work is performed.", bold: false },
   ]);
   y += 4;
 
-  if (data.billingDate) {
+  if (normalizedData.billingDate) {
     addWrappedText(`b. Customer will be invoiced on or by the day before service commencement of the same month`, margin, contentWidth);
     // addWrappedText(`b. Payment Terms: ${data.billingDate}`, margin, contentWidth);
     y += 4;
   }
 
-  addWrappedText(`c. ${data.invoiceNote}`, margin, contentWidth);
+  addWrappedText(`c. ${normalizedData.invoiceNote}`, margin, contentWidth);
   y += 4;
 
   addWrappedText("d. Unless noted, customer agrees that the following services are separate from this contract and can be quoted upon request:", margin, contentWidth);
   y += 4;
 
-  (data.extraServices || []).forEach((svc) => {
+  normalizedData.extraServices.forEach((svc) => {
     addPageIfNeeded(lineHeight);
     doc.text(`•  ${svc.label}`, margin + 8, y);
     const priceX = pageWidth - margin;
@@ -282,16 +290,16 @@ export async function generateServiceAgreementPDF(data: ServiceAgreementData, re
   });
   y += 4;
 
-  addWrappedText(`e. ${data.thirdPartyNote}`, margin, contentWidth);
+  addWrappedText(`e. ${normalizedData.thirdPartyNote}`, margin, contentWidth);
 
   // ============ VII. Signatures ============
   addSectionHeader("VII", "Signatures");
-  addWrappedText(data.signaturesNote, margin, contentWidth);
+  addWrappedText(normalizedData.signaturesNote, margin, contentWidth);
   y += 10;
 
   const sigRows = [
-    ["Customer:", data.clientName],
-    ["Contractor:", data.providerDBA || data.providerName],
+    ["Customer:", normalizedData.clientName],
+    ["Contractor:", normalizedData.providerDBA || normalizedData.providerName],
   ];
   sigRows.forEach(([label, value]) => {
     addPageIfNeeded(50);
@@ -311,12 +319,12 @@ export async function generateServiceAgreementPDF(data: ServiceAgreementData, re
   addPageIfNeeded(40);
   doc.setFontSize(8);
   doc.setTextColor(120);
-  if (data.pricesValidDays) {
-    doc.text(data.pricesValidDays, margin, y);
+  if (normalizedData.pricesValidDays) {
+    doc.text(normalizedData.pricesValidDays, margin, y);
     y += 12;
   }
-  if (data.copyrightText) {
-    doc.text(data.copyrightText, margin, y);
+  if (normalizedData.copyrightText) {
+    doc.text(normalizedData.copyrightText, margin, y);
     y += 12;
   }
 
@@ -327,14 +335,14 @@ export async function generateServiceAgreementPDF(data: ServiceAgreementData, re
     doc.setFontSize(8);
     doc.setTextColor(130);
     doc.setFont("helvetica", "normal");
-    doc.text(data.footerDisclaimer, pageWidth / 2, pageHeight - 20, { align: "center" });
+    doc.text(normalizedData.footerDisclaimer, pageWidth / 2, pageHeight - 20, { align: "center" });
   }
 
   if (returnBase64) {
     return doc.output("datauristring").split(",")[1];
   }
-  const safeName = (data.clientName || "Client").trim();
-  doc.save(`${safeName} - Service Agreement - ${data.date}.pdf`);
+  const safeName = (normalizedData.clientName || "Client").trim();
+  doc.save(`${safeName} - Service Agreement - ${normalizedData.date}.pdf`);
   return "";
 }
 
