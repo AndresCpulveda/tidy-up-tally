@@ -39,7 +39,7 @@ export interface TemplateSettings {
 
 const defaultProposalTemplate: ProposalTemplate = {
   title: "Cleaning Specifications",
-  contractorName: "Office Pride Commercial Cleaning Services",
+  contractorName: "Egusquiza Offices Solutions",
   weeklyTasks: [
     "Vacuum all carpet and floor mats.",
     "Dust, mop and damp mop all tile floors.",
