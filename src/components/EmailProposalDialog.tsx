@@ -50,6 +50,7 @@ export default function EmailProposalDialog({
 }: EmailProposalDialogProps) {
   const [open, setOpen] = useState(false);
   const [email, setEmail] = useState("");
+  const [recipientName, setRecipientName] = useState("");
   const [sending, setSending] = useState(false);
   const [includeProposal, setIncludeProposal] = useState(true);
   const [includeAgreement, setIncludeAgreement] = useState(true);
