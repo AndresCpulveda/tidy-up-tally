@@ -265,6 +265,7 @@ export default function EmailProposalDialog({
       toast({ title: "Email sent!", description: `${subjectParts.join(" & ")} sent as PDF attachment(s) to ${email}` });
       setOpen(false);
       setEmail("");
+      setRecipientName("");
       setShowPreview(false);
     } catch (err: any) {
       toast({
