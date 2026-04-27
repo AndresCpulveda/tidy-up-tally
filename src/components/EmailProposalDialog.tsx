@@ -50,6 +50,7 @@ export default function EmailProposalDialog({
 }: EmailProposalDialogProps) {
   const [open, setOpen] = useState(false);
   const [email, setEmail] = useState("");
+  const [recipientName, setRecipientName] = useState("");
   const [sending, setSending] = useState(false);
   const [includeProposal, setIncludeProposal] = useState(true);
   const [includeAgreement, setIncludeAgreement] = useState(true);
@@ -229,7 +230,7 @@ export default function EmailProposalDialog({
 
       const bodyHtml = `
 <div style="font-family: Arial, sans-serif; font-size: 14px; line-height: 1.6; color: #333;">
-  <p>Hi,</p>
+  <p>Hi${recipientName.trim() ? ` ${recipientName.trim()}` : ""},</p>
   <p>I'd like to thank you for allowing me to visit your facility to provide you with an estimate for janitorial services.  Per our discussion, we would be cleaning your facility ${timesPerWeek === 1 ? "once" : timesPerWeek === 2 ? "twice" : timesPerWeek + " times"} a week.  Attached, you will find a detailed estimate that outlines the scope of work, the services included, and the associated costs. Our proposal is designed to ensure your facilities are maintained to the highest standards of cleanliness and hygiene.</p>
   <p>Here are some of the key benefits you can expect from our services:</p>
   <ul>
@@ -264,6 +265,7 @@ export default function EmailProposalDialog({
       toast({ title: "Email sent!", description: `${subjectParts.join(" & ")} sent as PDF attachment(s) to ${email}` });
       setOpen(false);
       setEmail("");
+      setRecipientName("");
       setShowPreview(false);
     } catch (err: any) {
       toast({
@@ -290,6 +292,19 @@ export default function EmailProposalDialog({
           <DialogDescription>Send PDF documents as email attachments.</DialogDescription>
         </DialogHeader>
         <div className="space-y-4 pt-2">
+          <div>
+            <label htmlFor="recipient-name" className="block text-sm font-medium text-foreground mb-1">
+              Recipient Name
+            </label>
+            <input
+              id="recipient-name"
+              type="text"
+              placeholder="John"
+              value={recipientName}
+              onChange={(e) => setRecipientName(e.target.value)}
+              className="w-full rounded-lg border border-input bg-card px-3 py-2 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring transition"
+            />
+          </div>
           <div>
             <label htmlFor="recipient-email" className="block text-sm font-medium text-foreground mb-1">
               Recipient Email
