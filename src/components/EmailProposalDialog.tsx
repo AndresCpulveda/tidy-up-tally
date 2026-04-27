@@ -252,7 +252,7 @@ export default function EmailProposalDialog({
         body: {
           recipientEmail: email,
           bcc: ["carlosegusquiza@officepride.com"],
-          subject: `Cleaning ${subjectParts.join(" & ")} — $${totalBill.toFixed(2)}/month`,
+          subject: `Cleaning ${subjectParts.join(" & ")} — ${companyName}`,
           bodyHtml,
           attachments,
         },
