@@ -393,7 +393,34 @@ ${messageToHtml(message)}
             </label>
           </div>
 
-          {/* Preview Section */}
+          <div>
+            <div className="flex items-center justify-between mb-1">
+              <label htmlFor="email-message" className="block text-sm font-medium text-foreground">
+                Email Message
+              </label>
+              {messageEdited && (
+                <button
+                  type="button"
+                  onClick={resetMessage}
+                  className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition"
+                >
+                  <RotateCcw className="w-3 h-3" />
+                  Reset to default
+                </button>
+              )}
+            </div>
+            <Textarea
+              id="email-message"
+              value={message}
+              onChange={(e) => { setMessage(e.target.value); setMessageEdited(true); }}
+              rows={10}
+              className="min-h-[220px] font-mono text-xs"
+            />
+            <p className="mt-1 text-xs text-muted-foreground">
+              Use blank lines for paragraphs, lines starting with "- " become bullets, and **text** becomes bold.
+            </p>
+          </div>
+
           {showPreview && (previewUrls.proposal || previewUrls.agreement) && (
             <div className="border border-border rounded-lg overflow-hidden">
               {previewUrls.proposal && previewUrls.agreement ? (
