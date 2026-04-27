@@ -230,7 +230,7 @@ export default function EmailProposalDialog({
 
       const bodyHtml = `
 <div style="font-family: Arial, sans-serif; font-size: 14px; line-height: 1.6; color: #333;">
-  <p>Hi,</p>
+  <p>Hi${recipientName.trim() ? ` ${recipientName.trim()}` : ""},</p>
   <p>I'd like to thank you for allowing me to visit your facility to provide you with an estimate for janitorial services.  Per our discussion, we would be cleaning your facility ${timesPerWeek === 1 ? "once" : timesPerWeek === 2 ? "twice" : timesPerWeek + " times"} a week.  Attached, you will find a detailed estimate that outlines the scope of work, the services included, and the associated costs. Our proposal is designed to ensure your facilities are maintained to the highest standards of cleanliness and hygiene.</p>
   <p>Here are some of the key benefits you can expect from our services:</p>
   <ul>
