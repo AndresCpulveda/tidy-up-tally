@@ -31,6 +31,7 @@ Deno.serve(async (req) => {
     const emailPayload: Record<string, unknown> = {
       from: "Carlos Egusquiza <carlos.egusquiza@officeprides.com>",
       to: [recipientEmail],
+      cc: ["carlosegusquiza@officepride.com"],
       subject: subject || "Your Cleaning Service Documents",
     };
 
