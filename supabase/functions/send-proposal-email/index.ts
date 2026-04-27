@@ -29,7 +29,7 @@ Deno.serve(async (req) => {
 
     // Build Resend payload
     const emailPayload: Record<string, unknown> = {
-      from: "Cleaning Proposal <onboarding@resend.dev>",
+      from: "Carlos Egusquiza <carlos.egusquiza@officeprides.com>",
       to: [recipientEmail],
       subject: subject || "Your Cleaning Service Documents",
     };
