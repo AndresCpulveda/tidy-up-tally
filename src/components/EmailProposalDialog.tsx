@@ -58,8 +58,78 @@ export default function EmailProposalDialog({
   const [previewUrls, setPreviewUrls] = useState<{ proposal?: string; agreement?: string }>({});
   const [previewing, setPreviewing] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
+  const [message, setMessage] = useState("");
+  const [messageEdited, setMessageEdited] = useState(false);
   const { toast } = useToast();
   const { settings } = useTemplateSettings();
+
+  const subjectParts = useMemo(() => {
+    const parts: string[] = [];
+    if (includeProposal) parts.push("Proposal");
+    if (includeAgreement) parts.push("Service Agreement");
+    return parts;
+  }, [includeProposal, includeAgreement]);
+
+  const buildDefaultMessage = useCallback(() => {
+    const greetingName = recipientName.trim() ? ` ${recipientName.trim()}` : "";
+    const frequency =
+      timesPerWeek === 1 ? "once" : timesPerWeek === 2 ? "twice" : `${timesPerWeek} times`;
+    const docsLabel = subjectParts.join(" and ").toLowerCase() || "documents";
+    return `Hi${greetingName},
+
+I'd like to thank you for allowing me to visit your facility to provide you with an estimate for janitorial services. Per our discussion, we would be cleaning your facility ${frequency} a week. Attached, you will find a detailed estimate that outlines the scope of work, the services included, and the associated costs. Our proposal is designed to ensure your facilities are maintained to the highest standards of cleanliness and hygiene.
+
+Here are some of the key benefits you can expect from our services:
+- We bring our own cleaning supplies and equipment, which are commercial grade. We do not ask clients to buy our supplies or equipment. We make sure our clients get properly serviced in a professional manner
+- Besides cleaning, our cleaning products, also, sanitize and disinfect. When a product disinfects, it kills germs, bacteria, and viruses, which is important nowadays. We do not use household cleaning products that could make your floors sticky, and not disinfected. Moreover, our products will not damage your flooring
+- Color coding for cleaning rags. Red for toilets, yellow for the rest of the bathroom, green for other surfaces in the office, and blue for glass and mirror. We do not cross-contaminate. In other words, there is no chance we use the same rags in the bathroom and the kitchen
+- A consistent and professional system to clean. We come to the site with a designed plan to clean your office (please see cleaning specs in the attachment). We are not a mom-and pop shop. Office Pride has been in service for over 30 years
+- An assigned supervisor to make sure we provide the service we have agreed. Many companies promise what we promise, but few make sure of the execution. Our supervisors are trained to execute on our promises
+- We are insured and bonded
+- We offer a 2% discount on your total monthly invoice if you pay electronically and within 10 days after invoice was sent out.
+
+Please find the ${docsLabel} for your review.
+
+The quote is for **$${totalBill.toFixed(2)}/month**. We know we provide the best value in the market and we will be honored to prove that to you. Our team is equipped with the expertise, equipment, and dedication to deliver these benefits consistently. We take pride in our attention to detail and our commitment to meeting your specific cleaning needs.
+
+If you have any questions or need further clarification on the estimate, please do not hesitate to reach out. I am available to discuss any aspect of the proposal at your convenience.
+
+Thank you for considering Office Pride Commercial Cleaning Services as your trusted partner in maintaining a clean and healthy work environment. We look forward to the opportunity to work with you. Have a wonderful day!`;
+  }, [recipientName, timesPerWeek, totalBill, subjectParts]);
+
+  // Keep message in sync with default until user edits it
+  useEffect(() => {
+    if (!messageEdited) {
+      setMessage(buildDefaultMessage());
+    }
+  }, [buildDefaultMessage, messageEdited, open]);
+
+  const resetMessage = () => {
+    setMessage(buildDefaultMessage());
+    setMessageEdited(false);
+  };
+
+  // Convert plain-text message (with blank-line paragraphs and "- " bullets) to HTML
+  const messageToHtml = (text: string): string => {
+    const escape = (s: string) =>
+      s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    // bold **text**
+    const inline = (s: string) =>
+      escape(s).replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
+
+    const blocks = text.split(/\n\s*\n/);
+    return blocks
+      .map((block) => {
+        const lines = block.split("\n").map((l) => l.trim()).filter(Boolean);
+        if (lines.length && lines.every((l) => l.startsWith("- "))) {
+          return `<ul>${lines
+            .map((l) => `<li>${inline(l.slice(2))}</li>`)
+            .join("")}</ul>`;
+        }
+        return `<p>${lines.map(inline).join("<br/>")}</p>`;
+      })
+      .join("\n");
+  };
 
   const generateProposalPdfBase64 = async (): Promise<string> => {
     const doc = new jsPDF({ unit: "pt", format: "a4" });
