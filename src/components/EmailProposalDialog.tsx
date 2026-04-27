@@ -1,6 +1,7 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect, useMemo } from "react";
 import officePrideLogo from "@/assets/office-pride-logo.png";
-import { Mail, Send, Loader2, Eye } from "lucide-react";
+import { Mail, Send, Loader2, Eye, RotateCcw } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Dialog,
   DialogContent,
