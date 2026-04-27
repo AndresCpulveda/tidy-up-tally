@@ -32,6 +32,7 @@ Deno.serve(async (req) => {
       from: "Carlos Egusquiza <carlos.egusquiza@officeprides.com>",
       to: [recipientEmail],
       cc: ["carlosegusquiza@officepride.com"],
+      reply_to: ["carlosegusquiza@officepride.com"],
       subject: subject || "Your Cleaning Service Documents",
     };
 
