@@ -292,6 +292,19 @@ export default function EmailProposalDialog({
         </DialogHeader>
         <div className="space-y-4 pt-2">
           <div>
+            <label htmlFor="recipient-name" className="block text-sm font-medium text-foreground mb-1">
+              Recipient Name
+            </label>
+            <input
+              id="recipient-name"
+              type="text"
+              placeholder="John"
+              value={recipientName}
+              onChange={(e) => setRecipientName(e.target.value)}
+              className="w-full rounded-lg border border-input bg-card px-3 py-2 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring transition"
+            />
+          </div>
+          <div>
             <label htmlFor="recipient-email" className="block text-sm font-medium text-foreground mb-1">
               Recipient Email
             </label>
