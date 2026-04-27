@@ -332,7 +332,7 @@ ${messageToHtml(message)}
   };
 
   return (
-    <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (!o) { setShowPreview(false); } }}>
+    <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (!o) { setShowPreview(false); setMessageEdited(false); } }}>
       <DialogTrigger asChild>
         <button className="flex-1 flex items-center justify-center gap-2 rounded-xl border-2 border-primary bg-card px-4 py-3 font-semibold text-primary hover:bg-accent transition-all">
           <Mail className="w-5 h-5" />
