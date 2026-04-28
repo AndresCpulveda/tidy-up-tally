@@ -234,7 +234,7 @@ Thank you for considering Office Pride Commercial Cleaning Services as your trus
     const date = new Date().toLocaleDateString();
     return {
       providerName: settings.companyName,
-      providerDBA: settings.proposalTemplate.contractorName,
+      providerDBA: settings.proposalTemplate.dba,
       logoUrl: officePrideLogo,
       clientName: companyName,
       clientAddress: companyAddress,

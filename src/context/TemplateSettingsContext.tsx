@@ -3,6 +3,7 @@ import { createContext, useContext, useState, ReactNode } from "react";
 export interface ProposalTemplate {
   title: string;
   contractorName: string;
+  dba: string;
   weeklyTasks: string[];
   monthlyTasks: string[];
   footerText: string;
@@ -40,6 +41,7 @@ export interface TemplateSettings {
 const defaultProposalTemplate: ProposalTemplate = {
   title: "Cleaning Specifications",
   contractorName: "Egusquiza Offices Solutions",
+  dba: "Office Pride Commercial Cleaning Services",
   weeklyTasks: [
     "Vacuum all carpet and floor mats.",
     "Dust, mop and damp mop all tile floors.",

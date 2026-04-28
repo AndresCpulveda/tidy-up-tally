@@ -259,7 +259,7 @@ const CleaningCalculator = () => {
                   <button
                     onClick={() => generateServiceAgreementPDF({
                       providerName: settings.companyName,
-                      providerDBA: settings.proposalTemplate.contractorName,
+                      providerDBA: settings.proposalTemplate.dba,
                       logoUrl: officePrideLogo,
                       clientName,
                       clientAddress,
