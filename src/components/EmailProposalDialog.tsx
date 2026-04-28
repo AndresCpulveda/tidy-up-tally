@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect, useMemo } from "react";
 import officePrideLogo from "@/assets/office-pride-logo.png";
-import { Mail, Send, Loader2, Eye, RotateCcw } from "lucide-react";
+import { Mail, Send, Loader2, Eye, RotateCcw, Pencil } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import {
   Dialog,
@@ -60,6 +60,7 @@ export default function EmailProposalDialog({
   const [showPreview, setShowPreview] = useState(false);
   const [message, setMessage] = useState("");
   const [messageEdited, setMessageEdited] = useState(false);
+  const [showMessageEditor, setShowMessageEditor] = useState(false);
   const { toast } = useToast();
   const { settings } = useTemplateSettings();
 
@@ -319,6 +320,7 @@ ${messageToHtml(message)}
       setEmail("");
       setRecipientName("");
       setMessageEdited(false);
+      setShowMessageEditor(false);
       setShowPreview(false);
     } catch (err: any) {
       toast({
@@ -332,7 +334,7 @@ ${messageToHtml(message)}
   };
 
   return (
-    <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (!o) { setShowPreview(false); setMessageEdited(false); } }}>
+    <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (!o) { setShowPreview(false); setMessageEdited(false); setShowMessageEditor(false); } }}>
       <DialogTrigger asChild>
         <button className="flex-1 flex items-center justify-center gap-2 rounded-xl border-2 border-primary bg-card px-4 py-3 font-semibold text-primary hover:bg-accent transition-all">
           <Mail className="w-5 h-5" />
@@ -394,31 +396,54 @@ ${messageToHtml(message)}
           </div>
 
           <div>
-            <div className="flex items-center justify-between mb-1">
-              <label htmlFor="email-message" className="block text-sm font-medium text-foreground">
-                Email Message
-              </label>
-              {messageEdited && (
-                <button
-                  type="button"
-                  onClick={resetMessage}
-                  className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition"
-                >
-                  <RotateCcw className="w-3 h-3" />
-                  Reset to default
-                </button>
-              )}
-            </div>
-            <Textarea
-              id="email-message"
-              value={message}
-              onChange={(e) => { setMessage(e.target.value); setMessageEdited(true); }}
-              rows={10}
-              className="min-h-[220px] font-mono text-xs"
-            />
-            <p className="mt-1 text-xs text-muted-foreground">
-              Use blank lines for paragraphs, lines starting with "- " become bullets, and **text** becomes bold.
-            </p>
+            {!showMessageEditor ? (
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setShowMessageEditor(true)}
+                className="w-full"
+              >
+                <Pencil className="w-4 h-4" />
+                Edit default message
+              </Button>
+            ) : (
+              <>
+                <div className="flex items-center justify-between mb-1">
+                  <label htmlFor="email-message" className="block text-sm font-medium text-foreground">
+                    Email Message
+                  </label>
+                  <div className="flex items-center gap-3">
+                    {messageEdited && (
+                      <button
+                        type="button"
+                        onClick={resetMessage}
+                        className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition"
+                      >
+                        <RotateCcw className="w-3 h-3" />
+                        Reset to default
+                      </button>
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => setShowMessageEditor(false)}
+                      className="text-xs text-muted-foreground hover:text-foreground transition"
+                    >
+                      Hide
+                    </button>
+                  </div>
+                </div>
+                <Textarea
+                  id="email-message"
+                  value={message}
+                  onChange={(e) => { setMessage(e.target.value); setMessageEdited(true); }}
+                  rows={10}
+                  className="min-h-[220px] font-mono text-xs"
+                />
+                <p className="mt-1 text-xs text-muted-foreground">
+                  Use blank lines for paragraphs, lines starting with "- " become bullets, and **text** becomes bold.
+                </p>
+              </>
+            )}
           </div>
 
           {showPreview && (previewUrls.proposal || previewUrls.agreement) && (
