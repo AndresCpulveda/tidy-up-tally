@@ -178,6 +178,7 @@ const Templates = () => {
               <section className="space-y-4 p-6 rounded-xl border border-border bg-card">
                 <Field label="Document Title" value={proposalTemplate.title} onChange={(v) => updateProposal({ title: v })} />
                 <Field label="Contractor Name" value={proposalTemplate.contractorName} onChange={(v) => updateProposal({ contractorName: v })} />
+                <Field label="DBA" value={proposalTemplate.dba} onChange={(v) => updateProposal({ dba: v })} />
                 <EditableList label="Weekly Tasks" items={proposalTemplate.weeklyTasks} onUpdate={(items) => updateProposal({ weeklyTasks: items })} onRemove={removeWeeklyTask} newValue={newWeeklyTask} onNewChange={setNewWeeklyTask} onAdd={addWeeklyTask} placeholder="Add a new weekly task…" />
                 <EditableList label="Monthly Tasks" items={proposalTemplate.monthlyTasks} onUpdate={(items) => updateProposal({ monthlyTasks: items })} onRemove={removeMonthlyTask} newValue={newMonthlyTask} onNewChange={setNewMonthlyTask} onAdd={addMonthlyTask} placeholder="Add a new monthly task…" />
                 <AreaField label="Footer Text" value={proposalTemplate.footerText} onChange={(v) => updateProposal({ footerText: v })} />
