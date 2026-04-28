@@ -108,7 +108,7 @@ const Templates = () => {
       billingStartDate: new Date().toLocaleDateString(),
       ...agreementTemplate,
     });
-  }, [settings, proposalTemplate.contractorName, agreementTemplate]);
+  }, [settings, proposalTemplate.contractorName, proposalTemplate.dba, agreementTemplate]);
 
   return (
     <div className="min-h-screen flex flex-col items-center px-4 py-12">
