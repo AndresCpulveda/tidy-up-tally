@@ -3,6 +3,7 @@ import { createContext, useContext, useState, ReactNode } from "react";
 export interface ProposalTemplate {
   title: string;
   contractorName: string;
+  dba: string;
   weeklyTasks: string[];
   monthlyTasks: string[];
   footerText: string;
