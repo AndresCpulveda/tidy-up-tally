@@ -92,7 +92,7 @@ const Templates = () => {
   const agreementPreviewHtml = useMemo(() => {
     return buildServiceAgreementHtml({
       providerName: settings.companyName,
-      providerDBA: proposalTemplate.contractorName,
+      providerDBA: proposalTemplate.dba,
       logoUrl: officePrideLogo,
       clientName: "Sample Customer",
       clientAddress: "123 Sample St",
