@@ -35,7 +35,7 @@ export async function buildEmailSignature(): Promise<string> {
       <p style="margin: 2px 0 0;">Fort Lauderdale - Hollywood</p>
       <p style="margin: 2px 0 0;">O: 954.998.3518 | C: 317.679.3294</p>
       <p style="margin: 2px 0 12px;">
-        <a href="https://www.officepride.com/0401" style="color: #2a7a3b; text-decoration: none;">OfficePride.com/0401</a>
+        <a href="https://www.officepride.com/0401"; text-decoration: none;">OfficePride.com/0401</a>
       </p>
     </td>
   </tr>
