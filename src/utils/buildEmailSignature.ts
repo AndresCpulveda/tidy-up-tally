@@ -30,6 +30,7 @@ export async function buildEmailSignature(): Promise<string> {
   <tr>
     <td>
       <p style="margin: 0 0 12px;">Best regards,</p>
+      <br>
       <p style="margin: 0; font-size: 17px; color: #009739;"><strong>Carlos Egusquiza | Owner</strong></p>
       <p style="margin: 2px 0 0;"><strong>Office Pride Commercial Cleaning Services</strong></p>
       <p style="margin: 2px 0 0;">Fort Lauderdale - Hollywood</p>
