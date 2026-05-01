@@ -118,17 +118,47 @@ Thank you for considering Office Pride Commercial Cleaning Services as your trus
     const inline = (s: string) =>
       escape(s).replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
 
+    const isBullet = (l: string) => /^\s*([-*•])\s+/.test(l);
+    const stripBullet = (l: string) => l.replace(/^\s*([-*•])\s+/, "");
+
     const blocks = text.split(/\n\s*\n/);
     return blocks
       .map((block) => {
-        const lines = block.split("\n").map((l) => l.trim()).filter(Boolean);
-        if (lines.length && lines.every((l) => l.startsWith("- "))) {
-          return `<ul>${lines
-            .map((l) => `<li>${inline(l.slice(2))}</li>`)
-            .join("")}</ul>`;
+        const lines = block.split("\n").filter((l) => l.trim().length > 0);
+        if (!lines.length) return "";
+
+        // Walk through lines, grouping consecutive bullet lines into <ul>
+        const parts: string[] = [];
+        let buffer: string[] = [];
+        let listItems: string[] = [];
+
+        const flushBuffer = () => {
+          if (buffer.length) {
+            parts.push(`<p>${buffer.map((l) => inline(l.trim())).join("<br/>")}</p>`);
+            buffer = [];
+          }
+        };
+        const flushList = () => {
+          if (listItems.length) {
+            parts.push(`<ul>${listItems.map((l) => `<li>${inline(stripBullet(l))}</li>`).join("")}</ul>`);
+            listItems = [];
+          }
+        };
+
+        for (const line of lines) {
+          if (isBullet(line)) {
+            flushBuffer();
+            listItems.push(line);
+          } else {
+            flushList();
+            buffer.push(line);
+          }
         }
-        return `<p>${lines.map(inline).join("<br/>")}</p>`;
+        flushBuffer();
+        flushList();
+        return parts.join("");
       })
+      .filter(Boolean)
       .join("\n");
   };
 
