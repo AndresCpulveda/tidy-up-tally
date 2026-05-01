@@ -17,6 +17,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useTemplateSettings } from "@/context/TemplateSettingsContext";
 import { generateServiceAgreementPDF } from "@/utils/generateServiceAgreementPDF";
+import { buildEmailSignature } from "@/utils/buildEmailSignature";
 
 interface EmailProposalDialogProps {
   totalHoursPerWeek: number;
@@ -326,10 +327,11 @@ Thank you for considering Office Pride Commercial Cleaning Services as your trus
         attachments.push({ filename: `${safeName} - Service Agreement - ${date}.pdf`, content: agreementBase64 });
       }
 
+      const signatureHtml = await buildEmailSignature();
       const bodyHtml = `
 <div style="font-family: Arial, sans-serif; font-size: 14px; line-height: 1.6; color: #333;">
 ${messageToHtml(message)}
-<p>Best regards,<br/><strong>${settings.companyName}</strong></p>
+${signatureHtml}
 </div>`;
 
       const { data, error } = await supabase.functions.invoke("send-proposal-email", {
