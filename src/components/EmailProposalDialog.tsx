@@ -330,7 +330,7 @@ Thank you for considering Office Pride Commercial Cleaning Services as your trus
       const signatureHtml = await buildEmailSignature();
       const bodyHtml = `
 <div style="font-family: Arial, sans-serif; font-size: 14px; line-height: 1.6; color: #333;">
-${messageToHtml(message)}
+${messageToHtml(message)}<br>
 ${signatureHtml}
 </div>`;
 
